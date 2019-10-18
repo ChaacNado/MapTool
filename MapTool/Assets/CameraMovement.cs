@@ -7,7 +7,7 @@ public class CameraMovement : MonoBehaviour
 
     public float speed = 2f;
     public float edgeScrollSpeed = 0.5f;
-    private float zoom = 5;
+    public float zoom = 5;
     public bool edgeScrollEnabled = true;
     private float zoomSpeed = 2f;
 
@@ -16,7 +16,6 @@ public class CameraMovement : MonoBehaviour
     void Start()
     {
         myCam = GetComponent<Camera>();
-
     }
     // Update is called once per frame
     void Update()

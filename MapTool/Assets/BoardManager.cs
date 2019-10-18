@@ -12,14 +12,34 @@ public class BoardManager : MonoBehaviour
     public GameObject tilePrefabIGuess;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         tiles = new GameObject[boardRows, boardColumns];
         for (int i = 0; i < boardRows; i++)
         {
             for (int j = 0; j < boardColumns; j++)
             {
-                Debug.Log(tilePrefabIGuess);
+                tiles[i, j] = Instantiate(tilePrefabIGuess, new Vector3(i, j, 0), Quaternion.identity, transform);
+            }
+        }
+    }
+
+    public void Prepare(int GridSize)
+    {
+        for (int i = 0; i < boardRows; i++)
+        {
+            for (int j = 0; j < boardColumns; j++)
+            {
+                Destroy(tiles[i, j]);
+            }
+        }
+        boardRows = GridSize;
+        boardColumns = GridSize;
+        tiles = new GameObject[GridSize, GridSize];
+        for (int i = 0; i < boardRows; i++)
+        {
+            for (int j = 0; j < boardColumns; j++)
+            {
                 tiles[i, j] = Instantiate(tilePrefabIGuess, new Vector3(i, j, 0), Quaternion.identity, transform);
             }
         }
