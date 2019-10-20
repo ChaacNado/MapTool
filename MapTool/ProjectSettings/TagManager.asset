@@ -6,6 +6,7 @@ TagManager:
   tags:
   - RoadChance
   - GridSize
+  - Road
   layers:
   - Default
   - TransparentFX

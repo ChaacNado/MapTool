@@ -12,7 +12,7 @@ public class PCGScript : MonoBehaviour
     void Start()
     {
         GameObject.FindWithTag("RoadChance").GetComponent<InputField>().onEndEdit.AddListener(delegate
-        { 
+        {
             RoadChance = int.Parse(GameObject.FindWithTag("RoadChance").GetComponent<InputField>().text);
         });
         GameObject.FindWithTag("GridSize").GetComponent<InputField>().onEndEdit.AddListener(delegate
@@ -47,6 +47,7 @@ public class PCGScript : MonoBehaviour
                 j++;
             }
         }
+        board.GetComponent<BoardManager>().GenerateSpaces();
     }
 
     void SubmitValue(string arg0)
@@ -61,14 +62,16 @@ public class PCGScript : MonoBehaviour
             case "row":
                 for (int j = 0; j < board.GetComponent<BoardManager>().boardColumns; j++)
                 {
-                    board.GetComponent<BoardManager>().tiles[i, j].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0);
+                    board.GetComponent<BoardManager>().tiles[i, j].GetComponent<SpriteRenderer>().color = Color.black;
+                    board.GetComponent<BoardManager>().tiles[i, j].tag = "Road";
                 }
                 break;
 
             case "column":
                 for (int j = 0; j < board.GetComponent<BoardManager>().boardRows; j++)
                 {
-                    board.GetComponent<BoardManager>().tiles[j, i].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0);
+                    board.GetComponent<BoardManager>().tiles[j, i].GetComponent<SpriteRenderer>().color = Color.black;
+                    board.GetComponent<BoardManager>().tiles[j, i].tag = "Road";
                 }
                 break;
         }
