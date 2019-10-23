@@ -48,6 +48,8 @@ public class PCGScript : MonoBehaviour
             }
         }
         board.GetComponent<BoardManager>().GenerateSpaces();
+        board.GetComponent<BoardManager>().Combine();
+        //board.GetComponent<BoardManager>().Combine();
     }
 
     void SubmitValue(string arg0)
@@ -76,4 +78,10 @@ public class PCGScript : MonoBehaviour
                 break;
         }
     }
+
+    void Combine()
+    {
+
+    }
+
 }

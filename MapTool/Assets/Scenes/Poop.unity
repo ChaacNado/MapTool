@@ -1269,7 +1269,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardRows: 20
   boardColumns: 20
+  buildings: []
   tilePrefabIGuess: {fileID: 6471723991827966040, guid: c968a635a1bbe894d9867da38106b87a,
+    type: 3}
+  buildingPrefabIGuess: {fileID: 1558282838530865776, guid: 3a1648039fb488d4a9d2559ebe8304ce,
     type: 3}
 --- !u!4 &1731855705
 Transform:
