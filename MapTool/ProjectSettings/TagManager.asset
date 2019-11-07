@@ -8,6 +8,7 @@ TagManager:
   - GridSize
   - Road
   - Occupado
+  - Junction
   layers:
   - Default
   - TransparentFX

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,7 +33,7 @@ public class PCGScript : MonoBehaviour
         board.GetComponent<BoardManager>().Prepare(GridSize);
         for (int i = 0; i < board.GetComponent<BoardManager>().boardRows; i++)
         {
-            if (Random.Range(0, 100) > RoadChance)
+            if (UnityEngine.Random.Range(0, 100) > RoadChance)
             {
                 FillHer(i, "row");
                 i++;
@@ -41,15 +42,16 @@ public class PCGScript : MonoBehaviour
 
         for (int j = 0; j < board.GetComponent<BoardManager>().boardColumns; j++)
         {
-            if (Random.Range(0, 100) > RoadChance)
+            if (UnityEngine.Random.Range(0, 100) > RoadChance)
             {
                 FillHer(j, "column");
                 j++;
             }
         }
-        board.GetComponent<BoardManager>().GenerateSpaces();
-        board.GetComponent<BoardManager>().Combine();
-        //board.GetComponent<BoardManager>().Combine();
+        board.GetComponent<BoardManager>().GenerateRoads();
+        board.GetComponent<BoardManager>().GenerateJunctions();
+        RemoveRoads();
+        //board.GetComponent<BoardManager>().GenerateSpaces();
     }
 
     void SubmitValue(string arg0)
@@ -62,26 +64,61 @@ public class PCGScript : MonoBehaviour
         switch (direction)
         {
             case "row":
-                for (int j = 0; j < board.GetComponent<BoardManager>().boardColumns; j++)
+                for (int y = 0; y < board.GetComponent<BoardManager>().boardColumns; y++)
                 {
-                    board.GetComponent<BoardManager>().tiles[i, j].GetComponent<SpriteRenderer>().color = Color.black;
-                    board.GetComponent<BoardManager>().tiles[i, j].tag = "Road";
+                    board.GetComponent<BoardManager>().tiles[i, y].GetComponent<SpriteRenderer>().color = Color.black;
+                    if(board.GetComponent<BoardManager>().tiles[i, y].tag == "Road")
+                    {
+                        board.GetComponent<BoardManager>().tiles[i, y].tag = "Junction";
+                        board.GetComponent<BoardManager>().AddJunction(i, y);
+                    }
+                    else
+                    {
+                        board.GetComponent<BoardManager>().tiles[i, y].tag = "Road";
+                    }
                 }
                 break;
 
             case "column":
-                for (int j = 0; j < board.GetComponent<BoardManager>().boardRows; j++)
+                for (int x = 0; x < board.GetComponent<BoardManager>().boardRows; x++)
                 {
-                    board.GetComponent<BoardManager>().tiles[j, i].GetComponent<SpriteRenderer>().color = Color.black;
-                    board.GetComponent<BoardManager>().tiles[j, i].tag = "Road";
+                    board.GetComponent<BoardManager>().tiles[x, i].GetComponent<SpriteRenderer>().color = Color.black;
+                    if (board.GetComponent<BoardManager>().tiles[x, i].tag == "Road")
+                    {
+                        board.GetComponent<BoardManager>().tiles[x, i].tag = "Junction";
+                        board.GetComponent<BoardManager>().AddJunction(x, i);
+                    }
+                    else
+                    {
+                        board.GetComponent<BoardManager>().tiles[x, i].tag = "Road";
+                    }
                 }
                 break;
         }
     }
 
-    void Combine()
+    public void RemoveRoads()
     {
+        foreach(GameObject junction in board.GetComponent<BoardManager>().junctions)
+        {
+            int roadID = junction.GetComponent<JunctionScript>().GetRoads()[UnityEngine.Random.Range(0, junction.GetComponent<JunctionScript>().GetRoads().Count)];
+            foreach(GameObject road in board.GetComponent<BoardManager>().roads)
+            {
+                if (road.GetComponent<RoadScript>().GetID() == roadID)
+                {
+                    foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
+                    {
+                        board.GetComponent<BoardManager>().FreeTile(tile.Item1, tile.Item2);
+                        //Remove tiles from road, and remove road from list and from connected junctions.
+                    }
+                }
+            }
+        }
+    }
 
+    public void Merge()
+    {
+        board.GetComponent<BoardManager>().Combine();
     }
 
 }

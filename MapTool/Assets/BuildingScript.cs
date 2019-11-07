@@ -46,6 +46,16 @@ public class BuildingScript : MonoBehaviour
             neighbours.Add(id + buildings);
     }
 
+    public void AddNeighbour(int neighbourID)
+    {
+        neighbours.Add(neighbourID);
+    }
+
+    public void RemoveNeighbour(int neighbourID)
+    {
+        neighbours.Remove(neighbourID);
+    }
+
     public List<int> GetNeighbours()
     {
         return neighbours;
@@ -53,15 +63,23 @@ public class BuildingScript : MonoBehaviour
 
     public void SwitchNeighbour(int oldNeighbour, int newNeighbour)
     {
-        foreach(int neighbour in neighbours)
+        foreach (int neighbour in neighbours)
         {
-            if(neighbour == oldNeighbour)
+            if (neighbour == newNeighbour)
             {
-                neighbours.Remove(neighbour);
-                break;
+                return;
             }
         }
-        neighbours.Add(newNeighbour);
+        int index = 0;
+        foreach (int neighbour in neighbours)
+        {
+            if (neighbour == oldNeighbour)
+            {
+                neighbours[index] = newNeighbour;
+                break;
+            }
+            index++;
+        }
     }
 
     public int GetID()
