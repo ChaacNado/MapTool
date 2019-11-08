@@ -9,6 +9,7 @@ public class PCGScript : MonoBehaviour
     public GameObject board;
     int RoadChance;
     int GridSize;
+    bool[,] grid;
     // Start is called before the first frame update
     void Start()
     {
@@ -48,6 +49,9 @@ public class PCGScript : MonoBehaviour
                 j++;
             }
         }
+        int rows = board.GetComponent<BoardManager>().boardRows;
+        int columns = board.GetComponent<BoardManager>().boardColumns;
+        grid = new bool[rows, columns];
         board.GetComponent<BoardManager>().GenerateRoads();
         board.GetComponent<BoardManager>().GenerateJunctions();
         RemoveRoads();
@@ -68,7 +72,7 @@ public class PCGScript : MonoBehaviour
                 for (int y = 0; y < board.GetComponent<BoardManager>().boardColumns; y++)
                 {
                     board.GetComponent<BoardManager>().tiles[i, y].GetComponent<SpriteRenderer>().color = Color.black;
-                    if(board.GetComponent<BoardManager>().tiles[i, y].tag == "Road")
+                    if (board.GetComponent<BoardManager>().tiles[i, y].tag == "Road")
                     {
                         board.GetComponent<BoardManager>().tiles[i, y].tag = "Junction";
                         board.GetComponent<BoardManager>().AddJunction(i, y);
@@ -98,9 +102,107 @@ public class PCGScript : MonoBehaviour
         }
     }
 
+    public bool ConfirmRoadConnectivity(Tuple<int, int> dontCheck1, Tuple<int, int> dontCheck2)
+    {
+        int startX = board.GetComponent<BoardManager>().roads[0].GetComponent<RoadScript>().GetTiles()[0].Item1;
+        int startY = board.GetComponent<BoardManager>().roads[0].GetComponent<RoadScript>().GetTiles()[0].Item2;
+        RunAI(startX, startY, dontCheck1, dontCheck2);
+        foreach (GameObject road in board.GetComponent<BoardManager>().roads)
+        {
+            foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
+            {
+                int x = tile.Item1;
+                int y = tile.Item2;
+                if (grid[x, y] == false)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public void RunAI(int x, int y, Tuple<int, int> dontCheck1, Tuple<int, int> dontCheck2)
+    {
+        Tuple<int, int> position = new Tuple<int, int>(x, y);
+        bool roadFound = false;
+        while (roadFound)
+        {
+            roadFound = false;
+            //Check if position is on the forbidden road, if so: breakdance.
+            if ((position.Item1 == dontCheck1.Item1 && position.Item2 == dontCheck1.Item2) || (position.Item1 == dontCheck2.Item1 && position.Item2 == dontCheck2.Item2))
+            {
+                break;
+            }
+            grid[position.Item1, position.Item2] = true;
+            //WARNING: The code can check outside the array now.
+            if (board.GetComponent<BoardManager>().tiles[position.Item1 + 1, position.Item2].tag == "Road"
+                || board.GetComponent<BoardManager>().tiles[position.Item1 + 1, position.Item2].tag == "Junction")
+            {
+                //Right
+                if (grid[position.Item1 + 1, position.Item2] == false)
+                {
+                    position = new Tuple<int, int>(position.Item1 + 1, position.Item2);
+                    roadFound = true;
+                }
+            }
+            if (board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Road"
+                || board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Junction")
+            {
+                //Left
+                if (grid[position.Item1 - 1, position.Item2] == false)
+                {
+                    if (roadFound)
+                    {
+                        RunAI(position.Item1 - 1, position.Item2, dontCheck1, dontCheck2);
+                    }
+                    else
+                    {
+                        position = new Tuple<int, int>(position.Item1 - 1, position.Item2);
+                        roadFound = true;
+                    }
+                }
+            }
+            if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 + 1].tag == "Road"
+                || board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 + 1].tag == "Junction")
+            {
+                //Up
+                if (grid[position.Item1, position.Item2 + 1] == false)
+                {
+                    if (roadFound)
+                    {
+                        RunAI(position.Item1, position.Item2 + 1, dontCheck1, dontCheck2);
+                    }
+                    else
+                    {
+                        position = new Tuple<int, int>(position.Item1, position.Item2 + 1);
+                        roadFound = true;
+                    }
+                }
+            }
+            if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Road"
+                || board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Junction")
+            {
+                //Down
+                if (grid[position.Item1, position.Item2 - 1] == false)
+                {
+                    if (roadFound)
+                    {
+                        RunAI(position.Item1, position.Item2 - 1, dontCheck1, dontCheck2);
+                    }
+                    else
+                    {
+                        position = new Tuple<int, int>(position.Item1, position.Item2 - 1);
+                        roadFound = true;
+                    }
+                }
+            }
+        }
+    }
+
     public void RemoveRoads()
     {
-        foreach(GameObject junction in board.GetComponent<BoardManager>().junctions)
+        foreach (GameObject junction in board.GetComponent<BoardManager>().junctions)
         {
             if (junction.GetComponent<JunctionScript>().GetRoads().Count > 0)
             {
@@ -109,7 +211,10 @@ public class PCGScript : MonoBehaviour
                 {
                     if (road.GetComponent<RoadScript>().GetID() == roadID)
                     {
-                        board.GetComponent<BoardManager>().RemoveRoad(road, roadID);
+                        if (ConfirmRoadConnectivity(road.GetComponent<RoadScript>().GetFirstTile(), road.GetComponent<RoadScript>().GetLastTile()))
+                        {
+                            board.GetComponent<BoardManager>().RemoveRoad(road, roadID);
+                        }
                         break;
                     }
                 }
@@ -121,5 +226,4 @@ public class PCGScript : MonoBehaviour
     {
         board.GetComponent<BoardManager>().Combine();
     }
-
 }
