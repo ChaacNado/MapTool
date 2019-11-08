@@ -51,6 +51,7 @@ public class PCGScript : MonoBehaviour
         board.GetComponent<BoardManager>().GenerateRoads();
         board.GetComponent<BoardManager>().GenerateJunctions();
         RemoveRoads();
+        board.GetComponent<BoardManager>().FixJunctions();
         //board.GetComponent<BoardManager>().GenerateSpaces();
     }
 
@@ -101,15 +102,15 @@ public class PCGScript : MonoBehaviour
     {
         foreach(GameObject junction in board.GetComponent<BoardManager>().junctions)
         {
-            int roadID = junction.GetComponent<JunctionScript>().GetRoads()[UnityEngine.Random.Range(0, junction.GetComponent<JunctionScript>().GetRoads().Count)];
-            foreach(GameObject road in board.GetComponent<BoardManager>().roads)
+            if (junction.GetComponent<JunctionScript>().GetRoads().Count > 0)
             {
-                if (road.GetComponent<RoadScript>().GetID() == roadID)
+                int roadID = junction.GetComponent<JunctionScript>().GetRoads()[UnityEngine.Random.Range(0, junction.GetComponent<JunctionScript>().GetRoads().Count)];
+                foreach (GameObject road in board.GetComponent<BoardManager>().roads)
                 {
-                    foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
+                    if (road.GetComponent<RoadScript>().GetID() == roadID)
                     {
-                        board.GetComponent<BoardManager>().FreeTile(tile.Item1, tile.Item2);
-                        //Remove tiles from road, and remove road from list and from connected junctions.
+                        board.GetComponent<BoardManager>().RemoveRoad(road, roadID);
+                        break;
                     }
                 }
             }

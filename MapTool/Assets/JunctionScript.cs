@@ -22,10 +22,16 @@ public class JunctionScript : MonoBehaviour
     {
         return tile;
     }
+
     public void AddRoad(int id)
     {
         if(connectedRoads.Count < 4)
             connectedRoads.Add(id);
+    }
+
+    public void RemoveRoad(int id)
+    {
+        connectedRoads.Remove(id);
     }
 
     public List<int> GetRoads()

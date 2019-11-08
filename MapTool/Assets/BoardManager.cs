@@ -46,7 +46,7 @@ public class BoardManager : MonoBehaviour
                 Destroy(tiles[i, j]);
             }
         }
-        foreach(GameObject road in roads)
+        foreach (GameObject road in roads)
         {
             Destroy(road);
         }
@@ -83,7 +83,7 @@ public class BoardManager : MonoBehaviour
     {
         for (int x = 0; x < boardRows; x++)
         {
-            if ((tiles[x, 0].tag == "Road" || tiles[x, 0].tag == "Junction" ) && (tiles[x, 1].tag == "Road" || tiles[x, 1].tag == "Junction"))
+            if ((tiles[x, 0].tag == "Road" || tiles[x, 0].tag == "Junction") && (tiles[x, 1].tag == "Road" || tiles[x, 1].tag == "Junction"))
             {
                 int y = 0;
                 while (y < boardColumns)
@@ -135,7 +135,7 @@ public class BoardManager : MonoBehaviour
     public void GenerateJunctions()
     {
         Tuple<int, int> tileToCheck;
-        foreach(GameObject junction in junctions)
+        foreach (GameObject junction in junctions)
         {
             int x = junction.GetComponent<JunctionScript>().GetTile().Item1;
             int y = junction.GetComponent<JunctionScript>().GetTile().Item2;
@@ -163,6 +163,63 @@ public class BoardManager : MonoBehaviour
                 junction.GetComponent<JunctionScript>().AddRoad(road.GetComponent<RoadScript>().GetID());
             }
         }
+    }
+
+    public void RemoveRoad(GameObject road, int roadID)
+    {
+        foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
+        {
+            FreeTile(tile.Item1, tile.Item2);
+        }
+        for (int i = 0; i < junctions.Count; i++)
+        {
+            if (junctions[i].GetComponent<JunctionScript>().GetRoads().Contains(roadID))
+            {
+                junctions[i].GetComponent<JunctionScript>().RemoveRoad(roadID);
+            }
+        }
+        roads.Remove(road);
+        roadIndex--; //Dunno if will be used, but w/e
+    }
+
+    public void FixJunctions()
+    {
+        for (int i = 0; i < junctions.Count; i++)
+        {
+            if (junctions[i].GetComponent<JunctionScript>().GetRoads().Count < 1)
+            {
+                RemoveEmptyJunction(i);
+                i--;
+            }
+            else if(junctions[i].GetComponent<JunctionScript>().GetRoads().Count == 1)
+            {
+                MakeDeadEnd(i);
+                i--;
+            }
+        }
+    }
+
+    private void RemoveEmptyJunction(int i)
+    {
+        int x = junctions[i].GetComponent<JunctionScript>().GetTile().Item1;
+        int y = junctions[i].GetComponent<JunctionScript>().GetTile().Item2;
+        FreeTile(x, y);
+        junctions.RemoveAt(i);
+    }
+
+    private void MakeDeadEnd(int i)
+    {
+        int roadID = junctions[i].GetComponent<JunctionScript>().GetRoads()[0];
+        int x = junctions[i].GetComponent<JunctionScript>().GetTile().Item1;
+        int y = junctions[i].GetComponent<JunctionScript>().GetTile().Item2;
+        foreach (GameObject road in roads)
+        {
+            if(road.GetComponent<RoadScript>().GetID() == roadID)
+            {
+                road.GetComponent<RoadScript>().AddTile(x, y);
+            }
+        }
+        RemoveEmptyJunction(i);
     }
 
     public void FreeTile(int x, int y)
