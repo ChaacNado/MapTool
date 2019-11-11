@@ -10,6 +10,7 @@ public class BoardManager : MonoBehaviour
     public int boardColumns;
     private int junctionIndex;
     private int roadIndex;
+    private int buildingIndex;
 
     public GameObject[,] tiles;
     public List<GameObject> buildings;
@@ -56,8 +57,16 @@ public class BoardManager : MonoBehaviour
             Destroy(junction);
         }
         junctions.Clear();
+
+        foreach (GameObject building in buildings)
+        {
+            Destroy(building);
+        }
+        buildings.Clear();
+
         roadIndex = 0;
         junctionIndex = 0;
+        buildingIndex = 0;
         boardRows = GridSize;
         boardColumns = GridSize;
         tiles = new GameObject[GridSize, GridSize];
@@ -191,7 +200,7 @@ public class BoardManager : MonoBehaviour
                 RemoveEmptyJunction(i);
                 i--;
             }
-            else if(junctions[i].GetComponent<JunctionScript>().GetRoads().Count == 1)
+            else if (junctions[i].GetComponent<JunctionScript>().GetRoads().Count == 1)
             {
                 MakeDeadEnd(i);
                 i--;
@@ -214,18 +223,128 @@ public class BoardManager : MonoBehaviour
         int y = junctions[i].GetComponent<JunctionScript>().GetTile().Item2;
         foreach (GameObject road in roads)
         {
-            if(road.GetComponent<RoadScript>().GetID() == roadID)
+            if (road.GetComponent<RoadScript>().GetID() == roadID)
             {
                 road.GetComponent<RoadScript>().AddTile(x, y);
             }
         }
-        RemoveEmptyJunction(i);
+        junctions.RemoveAt(i);
     }
 
     public void FreeTile(int x, int y)
     {
         tiles[x, y].tag = "Untagged";
         tiles[x, y].GetComponent<SpriteRenderer>().color = Color.white;
+    }
+
+    public void GenerateBuildings()
+    {
+        foreach (GameObject tile in tiles)
+        {
+            if (tile.tag == "Untagged")
+            {
+                buildings.Add(Instantiate(buildingPrefab, transform));
+                buildings[buildingIndex].GetComponent<BuildingScript>().SetID(buildingIndex);
+                buildings[buildingIndex].GetComponent<BuildingScript>().SetColor(new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f)));
+                int x = tile.GetComponent<TileScript>().position.Item1;
+                int y = tile.GetComponent<TileScript>().position.Item2;
+                HouseBuilderAI(x, y);
+                buildingIndex++;
+            }
+        }
+        foreach(GameObject building in buildings)
+        {
+            foreach(Tuple<int,int> tile in building.GetComponent<BuildingScript>().GetTiles())
+            {
+                int x = tile.Item1;
+                int y = tile.Item2;
+                tiles[x, y].GetComponent<SpriteRenderer>().color = building.GetComponent<BuildingScript>().GetColor();
+            }
+        }
+    }
+
+    public void HouseBuilderAI(int x, int y)
+    {
+        Tuple<int, int> position = new Tuple<int, int>(x, y);
+        bool freeTileFound = true;
+        while (freeTileFound)
+        {
+            freeTileFound = false;
+            Tuple<int, int> move = null;
+            buildings[buildingIndex].GetComponent<BuildingScript>().AddTile(position.Item1, position.Item2);
+            tiles[position.Item1, position.Item2].tag = "Occupado";
+
+            if (position.Item1 + 1 < boardRows)
+            {
+                if (tiles[position.Item1 + 1, position.Item2].tag == "Untagged")
+                {
+                    //Right
+                    move = new Tuple<int, int>(position.Item1 + 1, position.Item2);
+                    freeTileFound = true;
+
+                }
+            }
+
+            if (position.Item1 - 1 >= 0)
+            {
+                if (tiles[position.Item1 - 1, position.Item2].tag == "Untagged")
+                {
+                    //Left
+
+                    if (freeTileFound)
+                    {
+                        HouseBuilderAI(position.Item1 - 1, position.Item2);
+                    }
+                    else
+                    {
+                        move = new Tuple<int, int>(position.Item1 - 1, position.Item2);
+                        freeTileFound = true;
+                    }
+
+                }
+            }
+
+            if (position.Item2 + 1 < boardColumns)
+            {
+                if (tiles[position.Item1, position.Item2 + 1].tag == "Untagged")
+                {
+                    //Up
+
+                    if (freeTileFound)
+                    {
+                        HouseBuilderAI(position.Item1, position.Item2 + 1);
+                    }
+                    else
+                    {
+                        move = new Tuple<int, int>(position.Item1, position.Item2 + 1);
+                        freeTileFound = true;
+                    }
+
+                }
+            }
+
+            if (position.Item2 - 1 >= 0)
+            {
+                if (tiles[position.Item1, position.Item2 - 1].tag == "Untagged")
+                {
+                    //Down
+                    if (freeTileFound)
+                    {
+                        HouseBuilderAI(position.Item1, position.Item2 - 1);
+                    }
+                    else
+                    {
+                        move = new Tuple<int, int>(position.Item1, position.Item2 - 1);
+                        freeTileFound = true;
+                    }
+
+                }
+            }
+            if (move != null)
+            {
+                position = move;
+            }
+        }
     }
 
     // Update is called once per frame

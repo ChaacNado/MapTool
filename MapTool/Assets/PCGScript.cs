@@ -57,6 +57,7 @@ public class PCGScript : MonoBehaviour
         board.GetComponent<BoardManager>().GenerateJunctions();
         RemoveRoads();
         board.GetComponent<BoardManager>().FixJunctions();
+        board.GetComponent<BoardManager>().GenerateBuildings();
         //board.GetComponent<BoardManager>().GenerateSpaces();
     }
 
@@ -108,7 +109,7 @@ public class PCGScript : MonoBehaviour
         grid = new bool[rows, columns];
         int startX = board.GetComponent<BoardManager>().roads[0].GetComponent<RoadScript>().GetTiles()[0].Item1;
         int startY = board.GetComponent<BoardManager>().roads[0].GetComponent<RoadScript>().GetTiles()[0].Item2;
-        RunAI(startX, startY, dontCheck1, dontCheck2);
+        RoadWalkerAI(startX, startY, dontCheck1, dontCheck2);
         foreach (GameObject road in board.GetComponent<BoardManager>().roads)
         {
             foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
@@ -121,7 +122,6 @@ public class PCGScript : MonoBehaviour
                 }
                 if (grid[x, y] == false)
                 {
-                    Debug.Log("False at: " + x + ", " + y);
                     return false;
                 }
             }
@@ -129,13 +129,14 @@ public class PCGScript : MonoBehaviour
         return true;
     }
 
-    public void RunAI(int x, int y, Tuple<int, int> dontCheck1, Tuple<int, int> dontCheck2)
+    public void RoadWalkerAI(int x, int y, Tuple<int, int> dontCheck1, Tuple<int, int> dontCheck2)
     {
         Tuple<int, int> position = new Tuple<int, int>(x, y);
         bool roadFound = true;
         while (roadFound)
         {
             roadFound = false;
+            Tuple<int, int> move = null;
             //Check if position is on the forbidden road, if so: breakdance.
             if ((position.Item1 == dontCheck1.Item1 && position.Item2 == dontCheck1.Item2) || (position.Item1 == dontCheck2.Item1 && position.Item2 == dontCheck2.Item2))
             {
@@ -151,12 +152,13 @@ public class PCGScript : MonoBehaviour
                     //Right
                     if (grid[position.Item1 + 1, position.Item2] == false)
                     {
-                        position = new Tuple<int, int>(position.Item1 + 1, position.Item2);
+                        move = new Tuple<int, int>(position.Item1 + 1, position.Item2);
                         roadFound = true;
                     }
                 }
             }
-            if (position.Item1 - 1 > 0)
+
+            if (position.Item1 - 1 >= 0)
             {
                 if (board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Road"
                 || board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Junction")
@@ -166,16 +168,17 @@ public class PCGScript : MonoBehaviour
                     {
                         if (roadFound)
                         {
-                            RunAI(position.Item1 - 1, position.Item2, dontCheck1, dontCheck2);
+                            RoadWalkerAI(position.Item1 - 1, position.Item2, dontCheck1, dontCheck2);
                         }
                         else
                         {
-                            position = new Tuple<int, int>(position.Item1 - 1, position.Item2);
+                            move = new Tuple<int, int>(position.Item1 - 1, position.Item2);
                             roadFound = true;
                         }
                     }
                 }
             }
+
             if (position.Item2 + 1 < columns)
             {
                 if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 + 1].tag == "Road"
@@ -186,17 +189,18 @@ public class PCGScript : MonoBehaviour
                     {
                         if (roadFound)
                         {
-                            RunAI(position.Item1, position.Item2 + 1, dontCheck1, dontCheck2);
+                            RoadWalkerAI(position.Item1, position.Item2 + 1, dontCheck1, dontCheck2);
                         }
                         else
                         {
-                            position = new Tuple<int, int>(position.Item1, position.Item2 + 1);
+                            move = new Tuple<int, int>(position.Item1, position.Item2 + 1);
                             roadFound = true;
                         }
                     }
                 }
             }
-            if (position.Item2 - 1 > 0)
+
+            if (position.Item2 - 1 >= 0)
             {
                 if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Road"
                 || board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Junction")
@@ -206,15 +210,19 @@ public class PCGScript : MonoBehaviour
                     {
                         if (roadFound)
                         {
-                            RunAI(position.Item1, position.Item2 - 1, dontCheck1, dontCheck2);
+                            RoadWalkerAI(position.Item1, position.Item2 - 1, dontCheck1, dontCheck2);
                         }
                         else
                         {
-                            position = new Tuple<int, int>(position.Item1, position.Item2 - 1);
+                            move = new Tuple<int, int>(position.Item1, position.Item2 - 1);
                             roadFound = true;
                         }
                     }
                 }
+            }
+            if(move != null)
+            {
+                position = move;
             }
         }
     }
