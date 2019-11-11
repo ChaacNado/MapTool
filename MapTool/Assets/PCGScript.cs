@@ -10,6 +10,8 @@ public class PCGScript : MonoBehaviour
     int RoadChance;
     int GridSize;
     bool[,] grid;
+    int rows;
+    int columns;
     // Start is called before the first frame update
     void Start()
     {
@@ -32,7 +34,9 @@ public class PCGScript : MonoBehaviour
     public void Generate()
     {
         board.GetComponent<BoardManager>().Prepare(GridSize);
-        for (int i = 0; i < board.GetComponent<BoardManager>().boardRows; i++)
+        rows = board.GetComponent<BoardManager>().boardRows;
+        columns = board.GetComponent<BoardManager>().boardColumns;
+        for (int i = 0; i < rows; i++)
         {
             if (UnityEngine.Random.Range(0, 100) > RoadChance)
             {
@@ -41,7 +45,7 @@ public class PCGScript : MonoBehaviour
             }
         }
 
-        for (int j = 0; j < board.GetComponent<BoardManager>().boardColumns; j++)
+        for (int j = 0; j < columns; j++)
         {
             if (UnityEngine.Random.Range(0, 100) > RoadChance)
             {
@@ -49,9 +53,6 @@ public class PCGScript : MonoBehaviour
                 j++;
             }
         }
-        int rows = board.GetComponent<BoardManager>().boardRows;
-        int columns = board.GetComponent<BoardManager>().boardColumns;
-        grid = new bool[rows, columns];
         board.GetComponent<BoardManager>().GenerateRoads();
         board.GetComponent<BoardManager>().GenerateJunctions();
         RemoveRoads();
@@ -69,7 +70,7 @@ public class PCGScript : MonoBehaviour
         switch (direction)
         {
             case "row":
-                for (int y = 0; y < board.GetComponent<BoardManager>().boardColumns; y++)
+                for (int y = 0; y < columns; y++)
                 {
                     board.GetComponent<BoardManager>().tiles[i, y].GetComponent<SpriteRenderer>().color = Color.black;
                     if (board.GetComponent<BoardManager>().tiles[i, y].tag == "Road")
@@ -85,7 +86,7 @@ public class PCGScript : MonoBehaviour
                 break;
 
             case "column":
-                for (int x = 0; x < board.GetComponent<BoardManager>().boardRows; x++)
+                for (int x = 0; x < rows; x++)
                 {
                     board.GetComponent<BoardManager>().tiles[x, i].GetComponent<SpriteRenderer>().color = Color.black;
                     if (board.GetComponent<BoardManager>().tiles[x, i].tag == "Road")
@@ -104,6 +105,7 @@ public class PCGScript : MonoBehaviour
 
     public bool ConfirmRoadConnectivity(Tuple<int, int> dontCheck1, Tuple<int, int> dontCheck2)
     {
+        grid = new bool[rows, columns];
         int startX = board.GetComponent<BoardManager>().roads[0].GetComponent<RoadScript>().GetTiles()[0].Item1;
         int startY = board.GetComponent<BoardManager>().roads[0].GetComponent<RoadScript>().GetTiles()[0].Item2;
         RunAI(startX, startY, dontCheck1, dontCheck2);
@@ -113,8 +115,13 @@ public class PCGScript : MonoBehaviour
             {
                 int x = tile.Item1;
                 int y = tile.Item2;
+                if (x == dontCheck1.Item1 && y == dontCheck1.Item2)
+                {
+                    break;
+                }
                 if (grid[x, y] == false)
                 {
+                    Debug.Log("False at: " + x + ", " + y);
                     return false;
                 }
             }
@@ -125,7 +132,7 @@ public class PCGScript : MonoBehaviour
     public void RunAI(int x, int y, Tuple<int, int> dontCheck1, Tuple<int, int> dontCheck2)
     {
         Tuple<int, int> position = new Tuple<int, int>(x, y);
-        bool roadFound = false;
+        bool roadFound = true;
         while (roadFound)
         {
             roadFound = false;
@@ -135,65 +142,77 @@ public class PCGScript : MonoBehaviour
                 break;
             }
             grid[position.Item1, position.Item2] = true;
-            //WARNING: The code can check outside the array now.
-            if (board.GetComponent<BoardManager>().tiles[position.Item1 + 1, position.Item2].tag == "Road"
-                || board.GetComponent<BoardManager>().tiles[position.Item1 + 1, position.Item2].tag == "Junction")
+
+            if (position.Item1 + 1 < rows)
             {
-                //Right
-                if (grid[position.Item1 + 1, position.Item2] == false)
+                if (board.GetComponent<BoardManager>().tiles[position.Item1 + 1, position.Item2].tag == "Road"
+                    || board.GetComponent<BoardManager>().tiles[position.Item1 + 1, position.Item2].tag == "Junction")
                 {
-                    position = new Tuple<int, int>(position.Item1 + 1, position.Item2);
-                    roadFound = true;
+                    //Right
+                    if (grid[position.Item1 + 1, position.Item2] == false)
+                    {
+                        position = new Tuple<int, int>(position.Item1 + 1, position.Item2);
+                        roadFound = true;
+                    }
                 }
             }
-            if (board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Road"
+            if (position.Item1 - 1 > 0)
+            {
+                if (board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Road"
                 || board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Junction")
-            {
-                //Left
-                if (grid[position.Item1 - 1, position.Item2] == false)
                 {
-                    if (roadFound)
+                    //Left
+                    if (grid[position.Item1 - 1, position.Item2] == false)
                     {
-                        RunAI(position.Item1 - 1, position.Item2, dontCheck1, dontCheck2);
-                    }
-                    else
-                    {
-                        position = new Tuple<int, int>(position.Item1 - 1, position.Item2);
-                        roadFound = true;
+                        if (roadFound)
+                        {
+                            RunAI(position.Item1 - 1, position.Item2, dontCheck1, dontCheck2);
+                        }
+                        else
+                        {
+                            position = new Tuple<int, int>(position.Item1 - 1, position.Item2);
+                            roadFound = true;
+                        }
                     }
                 }
             }
-            if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 + 1].tag == "Road"
+            if (position.Item2 + 1 < columns)
+            {
+                if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 + 1].tag == "Road"
                 || board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 + 1].tag == "Junction")
-            {
-                //Up
-                if (grid[position.Item1, position.Item2 + 1] == false)
                 {
-                    if (roadFound)
+                    //Up
+                    if (grid[position.Item1, position.Item2 + 1] == false)
                     {
-                        RunAI(position.Item1, position.Item2 + 1, dontCheck1, dontCheck2);
-                    }
-                    else
-                    {
-                        position = new Tuple<int, int>(position.Item1, position.Item2 + 1);
-                        roadFound = true;
+                        if (roadFound)
+                        {
+                            RunAI(position.Item1, position.Item2 + 1, dontCheck1, dontCheck2);
+                        }
+                        else
+                        {
+                            position = new Tuple<int, int>(position.Item1, position.Item2 + 1);
+                            roadFound = true;
+                        }
                     }
                 }
             }
-            if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Road"
-                || board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Junction")
+            if (position.Item2 - 1 > 0)
             {
-                //Down
-                if (grid[position.Item1, position.Item2 - 1] == false)
+                if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Road"
+                || board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Junction")
                 {
-                    if (roadFound)
+                    //Down
+                    if (grid[position.Item1, position.Item2 - 1] == false)
                     {
-                        RunAI(position.Item1, position.Item2 - 1, dontCheck1, dontCheck2);
-                    }
-                    else
-                    {
-                        position = new Tuple<int, int>(position.Item1, position.Item2 - 1);
-                        roadFound = true;
+                        if (roadFound)
+                        {
+                            RunAI(position.Item1, position.Item2 - 1, dontCheck1, dontCheck2);
+                        }
+                        else
+                        {
+                            position = new Tuple<int, int>(position.Item1, position.Item2 - 1);
+                            roadFound = true;
+                        }
                     }
                 }
             }
