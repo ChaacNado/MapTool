@@ -1476,8 +1476,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardRows: 20
   boardColumns: 20
-  junctionIndex: 0
-  roadIndex: 0
   buildings: []
   roads: []
   junctions: []
@@ -1489,6 +1487,7 @@ MonoBehaviour:
     type: 3}
   junctionPrefab: {fileID: 1648255087373238160, guid: 09ea2b64505852e4cb31fe06f821fb64,
     type: 3}
+  wallSprite: {fileID: 21300000, guid: 3d92ade9b3d8a1241bc4db7207a744a3, type: 3}
 --- !u!4 &1731855705
 Transform:
   m_ObjectHideFlags: 0

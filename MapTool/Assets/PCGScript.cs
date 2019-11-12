@@ -58,6 +58,9 @@ public class PCGScript : MonoBehaviour
         RemoveRoads();
         board.GetComponent<BoardManager>().FixJunctions();
         board.GetComponent<BoardManager>().GenerateBuildings();
+        SplitBuildings();
+        board.GetComponent<BoardManager>().PaintBuildings();
+        board.GetComponent<BoardManager>().MakeWalls();
         //board.GetComponent<BoardManager>().GenerateSpaces();
     }
 
@@ -220,7 +223,7 @@ public class PCGScript : MonoBehaviour
                     }
                 }
             }
-            if(move != null)
+            if (move != null)
             {
                 position = move;
             }
@@ -246,6 +249,50 @@ public class PCGScript : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    public void SplitBuildings()
+    {
+        int buildingCount = board.GetComponent<BoardManager>().buildings.Count;
+        for (int i = 0; i < buildingCount; i++)
+        {
+            int lowRow = rows;
+            int lowColumn = columns;
+            int maxRow = 0;
+            int maxColumn = 0;
+            int splitPoint = 0;
+            string direction = "";
+            foreach (Tuple<int, int> tile in board.GetComponent<BoardManager>().buildings[i].GetComponent<BuildingScript>().GetTiles())
+            {
+                if (maxRow < tile.Item1)
+                {
+                    maxRow = tile.Item1;
+                }
+                else if (lowRow > tile.Item1)
+                {
+                    lowRow = tile.Item1;
+                }
+                if (maxColumn < tile.Item2)
+                {
+                    maxColumn = tile.Item2;
+                }
+                else if (lowColumn > tile.Item2)
+                {
+                    lowColumn = tile.Item2;
+                }
+            }
+            if (maxRow - lowRow > maxColumn - lowColumn)
+            {
+                direction = "row";
+                splitPoint = UnityEngine.Random.Range(lowRow, maxRow);
+            }
+            else
+            {
+                direction = "column";
+                splitPoint = UnityEngine.Random.Range(lowColumn, maxColumn);
+            }
+            board.GetComponent<BoardManager>().SplitBuilding(i, splitPoint, direction);
         }
     }
 

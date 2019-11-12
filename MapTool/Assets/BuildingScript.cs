@@ -8,6 +8,7 @@ public class BuildingScript : MonoBehaviour
     private int id;
     private List<int> neighbours;
     private List<Tuple<int, int>> tiles;
+    public bool hasDoor;
     private Color color;
 
     // Start is called before the first frame update
@@ -26,6 +27,18 @@ public class BuildingScript : MonoBehaviour
     public void AddTile(int x, int y)
     {
         tiles.Add(new Tuple<int, int>(x, y));
+    }
+
+    public void RemoveTile(int x, int y)
+    {
+        foreach(Tuple<int,int> tile in tiles)
+        {
+            if(tile.Item1 == x && tile.Item2 == y)
+            {
+                tiles.Remove(tile);
+                break;
+            }
+        }
     }
 
     public List<Tuple<int,int>> GetTiles()

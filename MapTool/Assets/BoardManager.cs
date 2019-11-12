@@ -21,6 +21,7 @@ public class BoardManager : MonoBehaviour
     public GameObject buildingPrefab;
     public GameObject roadPrefab;
     public GameObject junctionPrefab;
+    public Sprite wallSprite;
     // Start is called before the first frame update
     void Awake()
     {
@@ -237,6 +238,19 @@ public class BoardManager : MonoBehaviour
         tiles[x, y].GetComponent<SpriteRenderer>().color = Color.white;
     }
 
+    public void PaintBuildings()
+    {
+        foreach (GameObject building in buildings)
+        {
+            foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
+            {
+                int x = tile.Item1;
+                int y = tile.Item2;
+                tiles[x, y].GetComponent<SpriteRenderer>().color = building.GetComponent<BuildingScript>().GetColor();
+            }
+        }
+    }
+
     public void GenerateBuildings()
     {
         foreach (GameObject tile in tiles)
@@ -252,17 +266,139 @@ public class BoardManager : MonoBehaviour
                 buildingIndex++;
             }
         }
-        foreach(GameObject building in buildings)
+    }
+
+    public void SplitBuilding(int i, int splitPoint, string direction)
+    {
+        Debug.Log("Split Building initiated at i = " + i + " splitPoint = " + splitPoint + " direction = " + direction);
+        buildings.Add(Instantiate(buildingPrefab, transform));
+        buildings[buildingIndex].GetComponent<BuildingScript>().SetID(buildingIndex);
+        buildings[buildingIndex].GetComponent<BuildingScript>().SetColor(new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f)));
+        List<Tuple<int, int>> removeList = new List<Tuple<int, int>>();
+        if (direction == "row")
         {
-            foreach(Tuple<int,int> tile in building.GetComponent<BuildingScript>().GetTiles())
+            Debug.Log("Row shit initiated");
+            foreach (Tuple<int, int> tile in buildings[i].GetComponent<BuildingScript>().GetTiles())
             {
-                int x = tile.Item1;
-                int y = tile.Item2;
-                tiles[x, y].GetComponent<SpriteRenderer>().color = building.GetComponent<BuildingScript>().GetColor();
+                Debug.Log("Looking at tile = " + tile.Item1 + ", " + tile.Item2);
+                if (tile.Item1 <= splitPoint)
+                {
+                    Debug.Log("Row shit done did");
+                    buildings[buildingIndex].GetComponent<BuildingScript>().AddTile(tile.Item1, tile.Item2);
+                    removeList.Add(new Tuple<int, int>(tile.Item1, tile.Item2));
+                }
+            }
+        }
+        else if (direction == "column")
+        {
+            Debug.Log("Column shit initiated");
+            foreach (Tuple<int, int> tile in buildings[i].GetComponent<BuildingScript>().GetTiles())
+            {
+                Debug.Log("Looking at tile = " + tile.Item1 + ", " + tile.Item2);
+                if (tile.Item2 <= splitPoint)
+                {
+                    Debug.Log("Column shit done did");
+                    buildings[buildingIndex].GetComponent<BuildingScript>().AddTile(tile.Item1, tile.Item2);
+                    removeList.Add(new Tuple<int, int>(tile.Item1, tile.Item2));
+                }
+            }
+        }
+        foreach (Tuple<int, int> tile in removeList)
+        {
+            buildings[i].GetComponent<BuildingScript>().RemoveTile(tile.Item1, tile.Item2);
+        }
+        buildingIndex++;
+    }
+
+    public void MakeWalls()
+    {
+        foreach (GameObject building in buildings)
+        {
+            foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
+            {
+                if (tiles[tile.Item1, tile.Item2].tag != "Road" && tiles[tile.Item1, tile.Item2].tag != "Junction")
+                {
+                    if (tile.Item1 != boardRows - 1)
+                    {
+                        if (!building.GetComponent<BuildingScript>().GetTiles().Contains(new Tuple<int, int>(tile.Item1 + 1, tile.Item2)))
+                        {
+                            tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().AddWall(wallSprite, 2);
+                        }
+                    }
+                    else
+                    {
+                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().AddWall(wallSprite, 2);
+                    }
+
+                    if (tile.Item1 != 0)
+                    {
+                        if (!building.GetComponent<BuildingScript>().GetTiles().Contains(new Tuple<int, int>(tile.Item1 - 1, tile.Item2)))
+                        {
+                            tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().AddWall(wallSprite, 1);
+                        }
+                    }
+                    else
+                    {
+                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().AddWall(wallSprite, 1);
+                    }
+
+                    if (tile.Item2 != boardColumns - 1)
+                    {
+                        if (!building.GetComponent<BuildingScript>().GetTiles().Contains(new Tuple<int, int>(tile.Item1, tile.Item2 + 1)))
+                        {
+                            tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().AddWall(wallSprite, 4);
+                        }
+                    }
+                    else
+                    {
+                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().AddWall(wallSprite, 4);
+                    }
+
+                    if (tile.Item2 != 0)
+                    {
+                        if (!building.GetComponent<BuildingScript>().GetTiles().Contains(new Tuple<int, int>(tile.Item1, tile.Item2 - 1)))
+                        {
+                            tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().AddWall(wallSprite, 8);
+                        }
+                    }
+                    else
+                    {
+                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().AddWall(wallSprite, 8);
+                    }
+                }
+            }
+        }
+        //Set doors. Doesn't really work.
+        foreach (GameObject building in buildings)
+        {
+            foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
+            {
+                if (tile.Item1 + 1 < boardRows && tile.Item1 - 1 >= 0 && tile.Item2 + 1 < boardColumns && tile.Item2 - 1 >= 0)
+                {
+                    if (tiles[tile.Item1 + 1, tile.Item2].tag == "Road")
+                    {
+                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().SetDoor();
+                        break;
+                    }
+                    else if (tiles[tile.Item1 - 1, tile.Item2].tag == "Road")
+                    {
+                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().SetDoor();
+                        break;
+                    }
+                    else if (tiles[tile.Item1, tile.Item2 + 1].tag == "Road")
+                    {
+                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().SetDoor();
+                        break;
+                    }
+                    else if (tiles[tile.Item1, tile.Item2 - 1].tag == "Road")
+                    {
+                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().SetDoor();
+                        break;
+                    }
+                }
             }
         }
     }
-
     public void HouseBuilderAI(int x, int y)
     {
         Tuple<int, int> position = new Tuple<int, int>(x, y);
