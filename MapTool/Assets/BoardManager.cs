@@ -203,7 +203,7 @@ public class BoardManager : MonoBehaviour
             }
             else if (junctions[i].GetComponent<JunctionScript>().GetRoads().Count == 1)
             {
-                MakeDeadEnd(i);
+                RemoveDeadEnd(i);
                 i--;
             }
         }
@@ -217,19 +217,18 @@ public class BoardManager : MonoBehaviour
         junctions.RemoveAt(i);
     }
 
-    private void MakeDeadEnd(int i)
+    private void RemoveDeadEnd(int i)
     {
         int roadID = junctions[i].GetComponent<JunctionScript>().GetRoads()[0];
-        int x = junctions[i].GetComponent<JunctionScript>().GetTile().Item1;
-        int y = junctions[i].GetComponent<JunctionScript>().GetTile().Item2;
         foreach (GameObject road in roads)
         {
             if (road.GetComponent<RoadScript>().GetID() == roadID)
             {
-                road.GetComponent<RoadScript>().AddTile(x, y);
+                RemoveRoad(road, roadID);
+                break;
             }
         }
-        junctions.RemoveAt(i);
+        RemoveEmptyJunction(i);
     }
 
     public void FreeTile(int x, int y)
@@ -262,28 +261,24 @@ public class BoardManager : MonoBehaviour
                 buildings[buildingIndex].GetComponent<BuildingScript>().SetColor(new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f)));
                 int x = tile.GetComponent<TileScript>().position.Item1;
                 int y = tile.GetComponent<TileScript>().position.Item2;
-                HouseBuilderAI(x, y);
+                HouseBuilderAI(x, y, buildings[buildingIndex]);
                 buildingIndex++;
             }
         }
     }
 
-    public void SplitBuilding(int i, int splitPoint, string direction)
+    public int SplitBuilding(int i, int splitPoint, string direction)
     {
-        Debug.Log("Split Building initiated at i = " + i + " splitPoint = " + splitPoint + " direction = " + direction);
         buildings.Add(Instantiate(buildingPrefab, transform));
         buildings[buildingIndex].GetComponent<BuildingScript>().SetID(buildingIndex);
         buildings[buildingIndex].GetComponent<BuildingScript>().SetColor(new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f)));
         List<Tuple<int, int>> removeList = new List<Tuple<int, int>>();
         if (direction == "row")
         {
-            Debug.Log("Row shit initiated");
             foreach (Tuple<int, int> tile in buildings[i].GetComponent<BuildingScript>().GetTiles())
             {
-                Debug.Log("Looking at tile = " + tile.Item1 + ", " + tile.Item2);
                 if (tile.Item1 <= splitPoint)
                 {
-                    Debug.Log("Row shit done did");
                     buildings[buildingIndex].GetComponent<BuildingScript>().AddTile(tile.Item1, tile.Item2);
                     removeList.Add(new Tuple<int, int>(tile.Item1, tile.Item2));
                 }
@@ -291,13 +286,10 @@ public class BoardManager : MonoBehaviour
         }
         else if (direction == "column")
         {
-            Debug.Log("Column shit initiated");
             foreach (Tuple<int, int> tile in buildings[i].GetComponent<BuildingScript>().GetTiles())
             {
-                Debug.Log("Looking at tile = " + tile.Item1 + ", " + tile.Item2);
                 if (tile.Item2 <= splitPoint)
                 {
-                    Debug.Log("Column shit done did");
                     buildings[buildingIndex].GetComponent<BuildingScript>().AddTile(tile.Item1, tile.Item2);
                     removeList.Add(new Tuple<int, int>(tile.Item1, tile.Item2));
                 }
@@ -308,6 +300,7 @@ public class BoardManager : MonoBehaviour
             buildings[i].GetComponent<BuildingScript>().RemoveTile(tile.Item1, tile.Item2);
         }
         buildingIndex++;
+        return (buildingIndex-1);
     }
 
     public void MakeWalls()
@@ -368,38 +361,8 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
-        //Set doors. Doesn't really work.
-        foreach (GameObject building in buildings)
-        {
-            foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
-            {
-                if (tile.Item1 + 1 < boardRows && tile.Item1 - 1 >= 0 && tile.Item2 + 1 < boardColumns && tile.Item2 - 1 >= 0)
-                {
-                    if (tiles[tile.Item1 + 1, tile.Item2].tag == "Road")
-                    {
-                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().SetDoor();
-                        break;
-                    }
-                    else if (tiles[tile.Item1 - 1, tile.Item2].tag == "Road")
-                    {
-                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().SetDoor();
-                        break;
-                    }
-                    else if (tiles[tile.Item1, tile.Item2 + 1].tag == "Road")
-                    {
-                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().SetDoor();
-                        break;
-                    }
-                    else if (tiles[tile.Item1, tile.Item2 - 1].tag == "Road")
-                    {
-                        tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().SetDoor();
-                        break;
-                    }
-                }
-            }
-        }
     }
-    public void HouseBuilderAI(int x, int y)
+    public void HouseBuilderAI(int x, int y, GameObject building)
     {
         Tuple<int, int> position = new Tuple<int, int>(x, y);
         bool freeTileFound = true;
@@ -407,7 +370,7 @@ public class BoardManager : MonoBehaviour
         {
             freeTileFound = false;
             Tuple<int, int> move = null;
-            buildings[buildingIndex].GetComponent<BuildingScript>().AddTile(position.Item1, position.Item2);
+            building.GetComponent<BuildingScript>().AddTile(position.Item1, position.Item2);
             tiles[position.Item1, position.Item2].tag = "Occupado";
 
             if (position.Item1 + 1 < boardRows)
@@ -429,7 +392,7 @@ public class BoardManager : MonoBehaviour
 
                     if (freeTileFound)
                     {
-                        HouseBuilderAI(position.Item1 - 1, position.Item2);
+                        HouseBuilderAI(position.Item1 - 1, position.Item2, building);
                     }
                     else
                     {
@@ -448,7 +411,7 @@ public class BoardManager : MonoBehaviour
 
                     if (freeTileFound)
                     {
-                        HouseBuilderAI(position.Item1, position.Item2 + 1);
+                        HouseBuilderAI(position.Item1, position.Item2 + 1, building);
                     }
                     else
                     {
@@ -466,7 +429,7 @@ public class BoardManager : MonoBehaviour
                     //Down
                     if (freeTileFound)
                     {
-                        HouseBuilderAI(position.Item1, position.Item2 - 1);
+                        HouseBuilderAI(position.Item1, position.Item2 - 1, building);
                     }
                     else
                     {

@@ -1,0 +1,28 @@
+﻿Doors - DoorLink: L, R, U, D
+DoorLeft - DoorLink: L, OpenLink: R, U, D
+DoorUp - DoorLink: U, OpenLink: L, R, D
+DoorRight - DoorLink: R, OpenLink: L, U, D
+DoorDown - DoorLink: D, OpenLink: L, R, U
+WallLeft - WallLink: L, OpenLink: R, U, D
+WallUp - WallLink: U, OpenLink: L, R, D
+WallRight - WallLink: R, OpenLink: L, U, D
+WallDown - WallLink: D, OpenLink: L, R, U
+
+DoorUpDown - DoorLink: U, D OpenLink: L, R
+DoorLeftRight - DoorLink: L, R OpenLink: U, D
+DoorLeftUp - DoorLink: L, U OpenLink: R, D
+DoorRightUp - DoorLink: R, U OpenLink: L, D
+DoorLeftDown - DoorLink: L, D OpenLink: R, U
+DoorRightDown - DoorLink: R, D OpenLink: L, U
+Open - ALL :D
+
+OpenDown
+OpenLeft
+OpenRight
+OpenUp
+OpenHorizontal
+OpenVertical
+CornerLeftUp
+CornerLeftDown
+CornerRightUp
+CornerRightDown

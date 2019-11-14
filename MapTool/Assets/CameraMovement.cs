@@ -65,31 +65,31 @@ public class CameraMovement : MonoBehaviour
         //        }
         //    }
         //}
-        foreach (GameObject junction in Board.GetComponent<BoardManager>().junctions)
-        {
-            int x = junction.GetComponent<JunctionScript>().GetTile().Item1;
-            int y = junction.GetComponent<JunctionScript>().GetTile().Item2;
-            if (Board.GetComponent<BoardManager>().tiles[x,y].GetComponent<Collider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
-            {
-                Debug.Log("Connected roads are: ");
-                foreach (int road in junction.GetComponent<JunctionScript>().GetRoads())
-                {
-                    Debug.Log("Road ID: " + road);
-                }
-            }
-        }
-        foreach (GameObject road in Board.GetComponent<BoardManager>().roads)
-        {
-            foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
-            {
-                int x = tile.Item1;
-                int y = tile.Item2;
-                if (Board.GetComponent<BoardManager>().tiles[x, y].GetComponent<Collider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
-                {
-                    Debug.Log("This Road's ID: " + road.GetComponent<RoadScript>().GetID());
-                }
-            }
-        }
+        //foreach (GameObject junction in Board.GetComponent<BoardManager>().junctions)
+        //{
+        //    int x = junction.GetComponent<JunctionScript>().GetTile().Item1;
+        //    int y = junction.GetComponent<JunctionScript>().GetTile().Item2;
+        //    if (Board.GetComponent<BoardManager>().tiles[x,y].GetComponent<Collider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
+        //    {
+        //        Debug.Log("Connected roads are: ");
+        //        foreach (int road in junction.GetComponent<JunctionScript>().GetRoads())
+        //        {
+        //            Debug.Log("Road ID: " + road);
+        //        }
+        //    }
+        //}
+        //foreach (GameObject road in Board.GetComponent<BoardManager>().roads)
+        //{
+        //    foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
+        //    {
+        //        int x = tile.Item1;
+        //        int y = tile.Item2;
+        //        if (Board.GetComponent<BoardManager>().tiles[x, y].GetComponent<Collider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
+        //        {
+        //            Debug.Log("This Road's ID: " + road.GetComponent<RoadScript>().GetID());
+        //        }
+        //    }
+        //}
     }
     private void ScrollZoom()
     {

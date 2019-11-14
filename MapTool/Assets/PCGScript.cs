@@ -9,6 +9,10 @@ public class PCGScript : MonoBehaviour
     public GameObject board;
     int RoadChance;
     int GridSize;
+    int minBuildingWidth;
+    int minBuildingHeight;
+    int maxBuildingWidth;
+    int maxBuildingHeight;
     bool[,] grid;
     int rows;
     int columns;
@@ -23,6 +27,24 @@ public class PCGScript : MonoBehaviour
         {
             GridSize = int.Parse(GameObject.FindWithTag("GridSize").GetComponent<InputField>().text);
         });
+
+        GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        {
+            minBuildingWidth = int.Parse(GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().text);
+        });
+        GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        {
+            minBuildingHeight = int.Parse(GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().text);
+        });
+
+        GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        {
+            maxBuildingWidth = int.Parse(GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().text);
+        });
+        GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        {
+            maxBuildingHeight = int.Parse(GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().text);
+        });
     }
 
     // Update is called once per frame
@@ -36,22 +58,39 @@ public class PCGScript : MonoBehaviour
         board.GetComponent<BoardManager>().Prepare(GridSize);
         rows = board.GetComponent<BoardManager>().boardRows;
         columns = board.GetComponent<BoardManager>().boardColumns;
-        for (int i = 0; i < rows; i++)
+        int stepsSinceLastRoad = minBuildingWidth;
+        for (int i = minBuildingWidth; i < rows - minBuildingWidth; i++)
         {
-            if (UnityEngine.Random.Range(0, 100) > RoadChance)
+            if (stepsSinceLastRoad >= maxBuildingWidth)
             {
                 FillHer(i, "row");
-                i++;
+                i += minBuildingWidth;
+                stepsSinceLastRoad += minBuildingWidth;
             }
+            else if (UnityEngine.Random.Range(0, 100) < RoadChance)
+            {
+                FillHer(i, "row");
+                i += minBuildingWidth;
+                stepsSinceLastRoad += minBuildingWidth;
+            }
+            stepsSinceLastRoad++;
         }
-
-        for (int j = 0; j < columns; j++)
+        stepsSinceLastRoad = minBuildingHeight;
+        for (int j = minBuildingHeight; j < columns - minBuildingHeight; j++)
         {
-            if (UnityEngine.Random.Range(0, 100) > RoadChance)
+            if (stepsSinceLastRoad >= maxBuildingHeight)
             {
                 FillHer(j, "column");
-                j++;
+                j += minBuildingHeight;
+                stepsSinceLastRoad += minBuildingHeight;
             }
+            else if (UnityEngine.Random.Range(0, 100) < RoadChance)
+            {
+                FillHer(j, "column");
+                j += minBuildingHeight;
+                stepsSinceLastRoad += minBuildingHeight;
+            }
+            stepsSinceLastRoad++;
         }
         board.GetComponent<BoardManager>().GenerateRoads();
         board.GetComponent<BoardManager>().GenerateJunctions();
@@ -255,45 +294,62 @@ public class PCGScript : MonoBehaviour
     public void SplitBuildings()
     {
         int buildingCount = board.GetComponent<BoardManager>().buildings.Count;
-        for (int i = 0; i < buildingCount; i++)
+        List<int> newBuildings = new List<int>();
+        int index = 0;
+        do
         {
-            int lowRow = rows;
-            int lowColumn = columns;
-            int maxRow = 0;
-            int maxColumn = 0;
-            int splitPoint = 0;
-            string direction = "";
-            foreach (Tuple<int, int> tile in board.GetComponent<BoardManager>().buildings[i].GetComponent<BuildingScript>().GetTiles())
+            for (int i = index; i < buildingCount; i++)
             {
-                if (maxRow < tile.Item1)
+                while (true)
                 {
-                    maxRow = tile.Item1;
-                }
-                else if (lowRow > tile.Item1)
-                {
-                    lowRow = tile.Item1;
-                }
-                if (maxColumn < tile.Item2)
-                {
-                    maxColumn = tile.Item2;
-                }
-                else if (lowColumn > tile.Item2)
-                {
-                    lowColumn = tile.Item2;
+                    int lowRow = rows;
+                    int lowColumn = columns;
+                    int maxRow = 0;
+                    int maxColumn = 0;
+                    int splitPoint = 0;
+                    string direction = "";
+                    foreach (Tuple<int, int> tile in board.GetComponent<BoardManager>().buildings[i].GetComponent<BuildingScript>().GetTiles())
+                    {
+                        if (maxRow < tile.Item1)
+                        {
+                            maxRow = tile.Item1;
+                        }
+                        else if (lowRow > tile.Item1)
+                        {
+                            lowRow = tile.Item1;
+                        }
+                        if (maxColumn < tile.Item2)
+                        {
+                            maxColumn = tile.Item2;
+                        }
+                        else if (lowColumn > tile.Item2)
+                        {
+                            lowColumn = tile.Item2;
+                        }
+                    }
+                    int width = maxRow - lowRow;
+                    int height = maxColumn - lowColumn;
+                    if (width >= minBuildingWidth * 2)
+                    {
+                        direction = "row";
+                        splitPoint = UnityEngine.Random.Range(lowRow + minBuildingWidth, maxRow - minBuildingWidth);
+                    }
+                    else if (height >= minBuildingHeight * 2)
+                    {
+                        direction = "column";
+                        splitPoint = UnityEngine.Random.Range(lowColumn + minBuildingHeight, maxColumn - minBuildingHeight);
+                    }
+                    else
+                    {
+                        newBuildings.Remove(i);
+                        break;
+                    }
+                    newBuildings.Add(board.GetComponent<BoardManager>().SplitBuilding(i, splitPoint, direction));
                 }
             }
-            if (maxRow - lowRow > maxColumn - lowColumn)
-            {
-                direction = "row";
-                splitPoint = UnityEngine.Random.Range(lowRow, maxRow);
-            }
-            else
-            {
-                direction = "column";
-                splitPoint = UnityEngine.Random.Range(lowColumn, maxColumn);
-            }
-            board.GetComponent<BoardManager>().SplitBuilding(i, splitPoint, direction);
-        }
+            index = buildingCount;
+            buildingCount += newBuildings.Count;
+        } while (newBuildings.Count > 0);
     }
 
     public void Merge()

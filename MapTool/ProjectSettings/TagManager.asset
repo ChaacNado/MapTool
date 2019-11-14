@@ -9,6 +9,10 @@ TagManager:
   - Road
   - Occupado
   - Junction
+  - MinBuildingWidth
+  - MinBuildingHeight
+  - MaxBuildingWidth
+  - MaxBuildingHeight
   layers:
   - Default
   - TransparentFX
