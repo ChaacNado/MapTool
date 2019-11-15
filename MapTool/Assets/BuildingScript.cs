@@ -26,6 +26,11 @@ public class BuildingScript : MonoBehaviour
 
     public void AddTile(int x, int y)
     {
+        foreach(Tuple<int,int> tile in tiles)
+        {
+            if (x == tile.Item1 && y == tile.Item2)
+                return;
+        }
         tiles.Add(new Tuple<int, int>(x, y));
     }
 

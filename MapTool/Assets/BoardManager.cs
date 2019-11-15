@@ -372,6 +372,7 @@ public class BoardManager : MonoBehaviour
             Tuple<int, int> move = null;
             building.GetComponent<BuildingScript>().AddTile(position.Item1, position.Item2);
             tiles[position.Item1, position.Item2].tag = "Occupado";
+            tiles[position.Item1, position.Item2].GetComponent<TileScript>().MakeBuildingRoomParent();
 
             if (position.Item1 + 1 < boardRows)
             {

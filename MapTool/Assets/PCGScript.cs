@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class PCGScript : MonoBehaviour
 {
     public GameObject board;
+    public Sprite wallSprite;
     int RoadChance;
     int GridSize;
     int minBuildingWidth;
@@ -100,6 +101,7 @@ public class PCGScript : MonoBehaviour
         SplitBuildings();
         board.GetComponent<BoardManager>().PaintBuildings();
         board.GetComponent<BoardManager>().MakeWalls();
+        GenerateInnerWalls();
         //board.GetComponent<BoardManager>().GenerateSpaces();
     }
 
@@ -352,6 +354,75 @@ public class PCGScript : MonoBehaviour
         } while (newBuildings.Count > 0);
     }
 
+    public void GenerateInnerWalls()
+    {
+        foreach (GameObject building in board.GetComponent<BoardManager>().buildings)
+        {
+            int lowRow = rows;
+            int lowColumn = columns;
+            int maxRow = 0;
+            int maxColumn = 0;
+            foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
+            {
+                if (maxRow < tile.Item1)
+                {
+                    maxRow = tile.Item1;
+                }
+                else if (lowRow > tile.Item1)
+                {
+                    lowRow = tile.Item1;
+                }
+                if (maxColumn < tile.Item2)
+                {
+                    maxColumn = tile.Item2;
+                }
+                else if (lowColumn > tile.Item2)
+                {
+                    lowColumn = tile.Item2;
+                }
+            }
+            int width = maxRow - lowRow + 1;
+            int height = maxColumn - lowColumn + 1;
+            if (width > height)
+            {
+                foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
+                {
+                    if (tile.Item1 == maxRow - width/2)
+                    {
+                        for (int x = 0; x < 2; x++)
+                        {
+                            for (int y = 0; y < 2; y++)
+                            {
+                                if(x == 0)
+                                    board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 1);
+                                else
+                                    board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 2);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
+                {
+                    if (tile.Item2 == maxColumn - height/2)
+                    {
+                        for (int x = 0; x < 2; x++)
+                        {
+                            for (int y = 0; y < 2; y++)
+                            {
+                                if (y == 0)
+                                    board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 4);
+                                else
+                                    board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 8);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     public void Merge()
     {
         board.GetComponent<BoardManager>().Combine();

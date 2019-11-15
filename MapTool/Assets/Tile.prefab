@@ -95,8 +95,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walls: []
+  numberOfWalls: 0
+  wallDirection: 0
+  hasDoor: 0
   wallPrefab: {fileID: 4304040189952168316, guid: 3e5a0dcf5ad477344bad761d60da9a46,
     type: 3}
+  tilePrefab: {fileID: 6471723991827966040}
 --- !u!61 &5546701989741359651
 BoxCollider2D:
   m_ObjectHideFlags: 0

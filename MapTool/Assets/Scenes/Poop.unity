@@ -2207,6 +2207,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   board: {fileID: 1731855703}
+  wallSprite: {fileID: 21300000, guid: 3d92ade9b3d8a1241bc4db7207a744a3, type: 3}
 --- !u!4 &1467604381
 Transform:
   m_ObjectHideFlags: 0
