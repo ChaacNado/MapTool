@@ -383,20 +383,39 @@ public class PCGScript : MonoBehaviour
             }
             int width = maxRow - lowRow + 1;
             int height = maxColumn - lowColumn + 1;
-            if (width > height)
+            if (height > width)
             {
+                List<int> randomColumns = new List<int>();
+                for (int i = lowColumn + 1; i < maxColumn - 1; i++)
+                {
+                    if (UnityEngine.Random.Range(0, 100) <= 20)
+                    {
+                        randomColumns.Add(i);
+                    }
+                }
                 foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
                 {
-                    if (tile.Item1 == maxRow - width/2)
+                    if (tile.Item1 == maxRow - width / 2)
                     {
                         for (int x = 0; x < 2; x++)
                         {
                             for (int y = 0; y < 2; y++)
                             {
-                                if(x == 0)
+                                if (x == 0)
                                     board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 1);
                                 else
                                     board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 2);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (int randomColumn in randomColumns)
+                        {
+                            if (tile.Item2 == randomColumn)
+                            {
+                                board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 0].GetComponent<TileScript>().AddWall(wallSprite, 4);
+                                board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[0, 0].GetComponent<TileScript>().AddWall(wallSprite, 4);
                             }
                         }
                     }
@@ -404,9 +423,17 @@ public class PCGScript : MonoBehaviour
             }
             else
             {
+                List<int> randomRows = new List<int>();
+                for (int i = lowRow + 1; i < maxRow - 1; i++)
+                {
+                    if (UnityEngine.Random.Range(0, 100) <= 20)
+                    {
+                        randomRows.Add(i);
+                    }
+                }
                 foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
                 {
-                    if (tile.Item2 == maxColumn - height/2)
+                    if (tile.Item2 == maxColumn - height / 2)
                     {
                         for (int x = 0; x < 2; x++)
                         {
@@ -416,6 +443,17 @@ public class PCGScript : MonoBehaviour
                                     board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 4);
                                 else
                                     board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 8);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (int randomRow in randomRows)
+                        {
+                            if (tile.Item1 == randomRow)
+                            {
+                                board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 0].GetComponent<TileScript>().AddWall(wallSprite, 2);
+                                board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 1].GetComponent<TileScript>().AddWall(wallSprite, 2);
                             }
                         }
                     }
