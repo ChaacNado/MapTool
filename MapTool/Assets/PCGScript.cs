@@ -17,6 +17,7 @@ public class PCGScript : MonoBehaviour
     bool[,] grid;
     int rows;
     int columns;
+    string fileName;
     // Start is called before the first frame update
     void Start()
     {
@@ -45,6 +46,10 @@ public class PCGScript : MonoBehaviour
         GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().onEndEdit.AddListener(delegate
         {
             maxBuildingHeight = int.Parse(GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().text);
+        });
+        GameObject.FindWithTag("FileName").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        {
+            fileName = GameObject.FindWithTag("FileName").GetComponent<InputField>().text;
         });
     }
 
@@ -464,5 +469,21 @@ public class PCGScript : MonoBehaviour
     public void Merge()
     {
         board.GetComponent<BoardManager>().Combine();
+    }
+
+    public void Export()
+    {
+        ExportScript.OpenFolderPanel(fileName);
+        foreach (GameObject building in board.GetComponent<BoardManager>().buildings)
+        {
+            ExportScript.WriteBuildingToFile(building.GetComponent<BuildingScript>().GetID());
+            foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
+            {
+                foreach(GameObject wall in board.GetComponent<BoardManager>().tiles[tile.Item1,tile.Item2].GetComponent<TileScript>().walls)
+                {
+                    ExportScript.WriteWallsToFile(wall.transform.position.x, wall.transform.position.y, wall.GetComponent<SpriteRenderer>().size.x, wall.GetComponent<SpriteRenderer>().size.y);
+                }
+            }
+        }
     }
 }

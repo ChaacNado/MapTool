@@ -13,6 +13,7 @@ TagManager:
   - MinBuildingHeight
   - MaxBuildingWidth
   - MaxBuildingHeight
+  - FileName
   layers:
   - Default
   - TransparentFX
