@@ -499,5 +499,7 @@ public class PCGScript : MonoBehaviour
                 ExportScript.WriteRoadToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y);
             }
         }
+
+        TestImportScript.ReadString();
     }
 }
