@@ -48,8 +48,11 @@ public static class ExportScript
         sr.Close();
     }
 
-    public static void WriteRoadToFile(int posX, int posY)
+    public static void WriteRoadToFile(float posX, float posY)
     {
-
+        string line = "r " + posX + " " + posY;
+        var sr = File.AppendText(path);
+        sr.WriteLine(line);
+        sr.Close();
     }
 }

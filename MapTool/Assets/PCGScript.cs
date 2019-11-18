@@ -479,10 +479,24 @@ public class PCGScript : MonoBehaviour
             ExportScript.WriteBuildingToFile(building.GetComponent<BuildingScript>().GetID());
             foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
             {
-                foreach(GameObject wall in board.GetComponent<BoardManager>().tiles[tile.Item1,tile.Item2].GetComponent<TileScript>().walls)
+                foreach (GameObject wall in board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().walls)
                 {
                     ExportScript.WriteWallsToFile(wall.transform.position.x, wall.transform.position.y, wall.GetComponent<SpriteRenderer>().size.x, wall.GetComponent<SpriteRenderer>().size.y);
                 }
+                foreach (GameObject innerTile in board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles)
+                {
+                    foreach (GameObject wall in innerTile.GetComponent<TileScript>().walls)
+                    {
+                        ExportScript.WriteWallsToFile(wall.transform.position.x, wall.transform.position.y, wall.GetComponent<SpriteRenderer>().size.x, wall.GetComponent<SpriteRenderer>().size.y);
+                    }
+                }
+            }
+        }
+        foreach (GameObject road in board.GetComponent<BoardManager>().roads)
+        {
+            foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
+            {
+                ExportScript.WriteRoadToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y);
             }
         }
     }
