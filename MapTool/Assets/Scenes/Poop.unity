@@ -795,7 +795,7 @@ GameObject:
   - component: {fileID: 154764987}
   - component: {fileID: 154764986}
   m_Layer: 5
-  m_Name: Text
+  m_Name: GridSizeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1027,7 +1027,7 @@ GameObject:
   - component: {fileID: 316556870}
   - component: {fileID: 316556869}
   m_Layer: 5
-  m_Name: InputField
+  m_Name: StreetChanceInputField
   m_TagString: RoadChance
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1576,7 +1576,7 @@ GameObject:
   - component: {fileID: 588371559}
   - component: {fileID: 588371558}
   m_Layer: 5
-  m_Name: Run PCG
+  m_Name: RunPCGButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1599,7 +1599,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000045776, y: -429.1}
+  m_AnchoredPosition: {x: -75.865, y: 179}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &588371558
@@ -1792,6 +1792,49 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 1
   m_TargetDisplay: 0
+--- !u!1 &786649837
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 786649839}
+  - component: {fileID: 786649838}
+  m_Layer: 0
+  m_Name: EditorManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &786649838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786649837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 689c5873421e7a14db3419356a3bd56b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &786649839
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786649837}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 923.65466, y: 617.4783, z: -1051.75}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &867440852
 GameObject:
   m_ObjectHideFlags: 0
@@ -2036,7 +2079,7 @@ GameObject:
   - component: {fileID: 1162459228}
   - component: {fileID: 1162459227}
   m_Layer: 5
-  m_Name: Export
+  m_Name: ExportButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2055,7 +2098,7 @@ RectTransform:
   m_Children:
   - {fileID: 270947064}
   m_Father: {fileID: 1963788617}
-  m_RootOrder: 13
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2382,6 +2425,83 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1317020364}
+  m_CullTransparentMesh: 0
+--- !u!1 &1396666747
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1396666748}
+  - component: {fileID: 1396666750}
+  - component: {fileID: 1396666749}
+  m_Layer: 5
+  m_Name: FilenameText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1396666748
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396666747}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1963788617}
+  m_RootOrder: 13
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -75.869995, y: -451.5}
+  m_SizeDelta: {x: 160, y: 30}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1396666749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396666747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 14
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 40
+    m_Alignment: 0
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: 'Save map as:'
+--- !u!222 &1396666750
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396666747}
   m_CullTransparentMesh: 0
 --- !u!1 &1467604379
 GameObject:
@@ -2723,7 +2843,7 @@ GameObject:
   - component: {fileID: 1633373538}
   - component: {fileID: 1633373537}
   m_Layer: 5
-  m_Name: InputField
+  m_Name: FilenameInputField
   m_TagString: FileName
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2861,7 +2981,7 @@ GameObject:
   - component: {fileID: 1677218067}
   - component: {fileID: 1677218066}
   m_Layer: 5
-  m_Name: Text
+  m_Name: StreetChanceText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3073,7 +3193,7 @@ GameObject:
   - component: {fileID: 1865293286}
   - component: {fileID: 1865293285}
   m_Layer: 5
-  m_Name: InputField
+  m_Name: GridSizeInputField
   m_TagString: GridSize
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3350,7 +3470,7 @@ GameObject:
   - component: {fileID: 1963788616}
   - component: {fileID: 1963788615}
   m_Layer: 5
-  m_Name: Image
+  m_Name: UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3416,8 +3536,9 @@ RectTransform:
   - {fileID: 11250315}
   - {fileID: 1317020365}
   - {fileID: 1924066733}
-  - {fileID: 1162459226}
+  - {fileID: 1396666748}
   - {fileID: 1633373536}
+  - {fileID: 1162459226}
   m_Father: {fileID: 739553917}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

@@ -53,12 +53,6 @@ public class PCGScript : MonoBehaviour
         });
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void Generate()
     {
         board.GetComponent<BoardManager>().Prepare(GridSize);
@@ -71,13 +65,13 @@ public class PCGScript : MonoBehaviour
             {
                 FillHer(i, "row");
                 i += minBuildingWidth;
-                stepsSinceLastRoad += minBuildingWidth;
+                stepsSinceLastRoad = minBuildingWidth;
             }
             else if (UnityEngine.Random.Range(0, 100) < RoadChance)
             {
                 FillHer(i, "row");
                 i += minBuildingWidth;
-                stepsSinceLastRoad += minBuildingWidth;
+                stepsSinceLastRoad = minBuildingWidth;
             }
             stepsSinceLastRoad++;
         }
@@ -88,13 +82,13 @@ public class PCGScript : MonoBehaviour
             {
                 FillHer(j, "column");
                 j += minBuildingHeight;
-                stepsSinceLastRoad += minBuildingHeight;
+                stepsSinceLastRoad = minBuildingHeight;
             }
             else if (UnityEngine.Random.Range(0, 100) < RoadChance)
             {
                 FillHer(j, "column");
                 j += minBuildingHeight;
-                stepsSinceLastRoad += minBuildingHeight;
+                stepsSinceLastRoad = minBuildingHeight;
             }
             stepsSinceLastRoad++;
         }
@@ -108,11 +102,6 @@ public class PCGScript : MonoBehaviour
         board.GetComponent<BoardManager>().MakeWalls();
         GenerateInnerWalls();
         //board.GetComponent<BoardManager>().GenerateSpaces();
-    }
-
-    void SubmitValue(string arg0)
-    {
-        RoadChance = int.Parse(arg0);
     }
 
     void FillHer(int i, string direction)
@@ -492,12 +481,19 @@ public class PCGScript : MonoBehaviour
                 }
             }
         }
+
         foreach (GameObject road in board.GetComponent<BoardManager>().roads)
         {
             foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
             {
                 ExportScript.WriteRoadToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y);
             }
+        }
+
+        foreach (GameObject junction in board.GetComponent<BoardManager>().junctions)
+        {
+            Tuple<int, int> tile = junction.GetComponent<JunctionScript>().GetTile();
+            ExportScript.WriteJunctionToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y);
         }
 
         TestImportScript.ReadString();

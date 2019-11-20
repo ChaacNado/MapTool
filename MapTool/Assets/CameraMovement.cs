@@ -11,6 +11,8 @@ public class CameraMovement : MonoBehaviour
     public float zoom = 5;
     public bool edgeScrollEnabled = true;
     private float zoomSpeed = 2f;
+    private Vector3 pivot;
+    private Vector3 previousPosition;
 
     private Camera myCam;
     public GameObject Board;
@@ -24,72 +26,39 @@ public class CameraMovement : MonoBehaviour
     {
         ScrollZoom();
         //EdgeScroll();
-        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+        if (Input.GetMouseButton(1))
         {
-            transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
+            if (Input.GetMouseButtonDown(1))
+            {
+                pivot = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            }
+            Debug.Log("MousePos: " + Input.mousePosition + "PreviousPosition: " + previousPosition);
+            Vector3 distance = Input.mousePosition - previousPosition;
+            Debug.Log("Distance in camera space: " + Camera.main.ScreenToWorldPoint(distance));
+            transform.position = new Vector3(0.01f * Camera.main.ScreenToWorldPoint(distance).x, 0.01f * Camera.main.ScreenToWorldPoint(distance).y, -10);
+            Debug.Log("Cam Position: " + transform.position);
+            previousPosition = Input.mousePosition;
+            //transform.position = Camera.main.(Input.mousePosition);
         }
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+        else
         {
-            transform.Translate(new Vector3(-speed * Time.deltaTime, 0, 0));
+            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+            {
+                transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
+            }
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+            {
+                transform.Translate(new Vector3(-speed * Time.deltaTime, 0, 0));
+            }
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
+            {
+                transform.Translate(new Vector3(0, speed * Time.deltaTime, 0));
+            }
+            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+            {
+                transform.Translate(new Vector3(0, -speed * Time.deltaTime, 0));
+            }
         }
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
-        {
-            transform.Translate(new Vector3(0, speed * Time.deltaTime, 0));
-        }
-        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
-        {
-            transform.Translate(new Vector3(0, -speed * Time.deltaTime, 0));
-        }
-
-        //foreach (GameObject tile in Board.GetComponent<BoardManager>().tiles)
-        //{
-        //    if (tile.tag != "Road" && tile.tag != "Junction" && tile.GetComponent<Collider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
-        //    {
-        //        foreach (GameObject building in Board.GetComponent<BoardManager>().buildings)
-        //        {
-        //            foreach (Tuple<int,int> buildingTile in building.GetComponent<BuildingScript>().GetTiles())
-        //            {
-        //                if (tile.GetComponent<TileScript>().position.Item1 == buildingTile.Item1)
-        //                {
-        //                    if (tile.GetComponent<TileScript>().position.Item2 == buildingTile.Item2)
-        //                    {
-        //                        Debug.Log("building ID: " + building.GetComponent<BuildingScript>().GetID());
-        //                        Debug.Log("My Neighbours: ");
-        //                        foreach(int neighbour in building.GetComponent<BuildingScript>().GetNeighbours())
-        //                        {
-        //                            Debug.Log(neighbour);
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-        //foreach (GameObject junction in Board.GetComponent<BoardManager>().junctions)
-        //{
-        //    int x = junction.GetComponent<JunctionScript>().GetTile().Item1;
-        //    int y = junction.GetComponent<JunctionScript>().GetTile().Item2;
-        //    if (Board.GetComponent<BoardManager>().tiles[x,y].GetComponent<Collider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
-        //    {
-        //        Debug.Log("Connected roads are: ");
-        //        foreach (int road in junction.GetComponent<JunctionScript>().GetRoads())
-        //        {
-        //            Debug.Log("Road ID: " + road);
-        //        }
-        //    }
-        //}
-        //foreach (GameObject road in Board.GetComponent<BoardManager>().roads)
-        //{
-        //    foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
-        //    {
-        //        int x = tile.Item1;
-        //        int y = tile.Item2;
-        //        if (Board.GetComponent<BoardManager>().tiles[x, y].GetComponent<Collider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
-        //        {
-        //            Debug.Log("This Road's ID: " + road.GetComponent<RoadScript>().GetID());
-        //        }
-        //    }
-        //}
     }
     private void ScrollZoom()
     {

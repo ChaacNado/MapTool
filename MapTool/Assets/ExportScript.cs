@@ -55,4 +55,12 @@ public static class ExportScript
         sr.WriteLine(line);
         sr.Close();
     }
+
+    public static void WriteJunctionToFile(float posX, float posY)
+    {
+        string line = "j " + posX + " " + posY;
+        var sr = File.AppendText(path);
+        sr.WriteLine(line);
+        sr.Close();
+    }
 }
