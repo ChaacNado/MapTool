@@ -484,9 +484,18 @@ public class PCGScript : MonoBehaviour
 
         foreach (GameObject road in board.GetComponent<BoardManager>().roads)
         {
+            string alignment = "";
+            if (road.GetComponent<RoadScript>().GetFirstTile().Item1 == road.GetComponent<RoadScript>().GetLastTile().Item1)
+            {
+                alignment = "h";
+            }
+            else
+            {
+                alignment = "v";
+            }
             foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
             {
-                ExportScript.WriteRoadToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y);
+                ExportScript.WriteRoadToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y, alignment);
             }
         }
 

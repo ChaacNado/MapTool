@@ -30,15 +30,11 @@ public class CameraMovement : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(1))
             {
-                pivot = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                previousPosition = Input.mousePosition;
             }
-            Debug.Log("MousePos: " + Input.mousePosition + "PreviousPosition: " + previousPosition);
             Vector3 distance = Input.mousePosition - previousPosition;
-            Debug.Log("Distance in camera space: " + Camera.main.ScreenToWorldPoint(distance));
-            transform.position = new Vector3(0.01f * Camera.main.ScreenToWorldPoint(distance).x, 0.01f * Camera.main.ScreenToWorldPoint(distance).y, -10);
-            Debug.Log("Cam Position: " + transform.position);
+            transform.position -= distance * 0.1f;
             previousPosition = Input.mousePosition;
-            //transform.position = Camera.main.(Input.mousePosition);
         }
         else
         {

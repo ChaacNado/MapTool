@@ -48,9 +48,9 @@ public static class ExportScript
         sr.Close();
     }
 
-    public static void WriteRoadToFile(float posX, float posY)
+    public static void WriteRoadToFile(float posX, float posY, string alignment)
     {
-        string line = "r " + posX + " " + posY;
+        string line = "r " + posX + " " + posY + " " + alignment;
         var sr = File.AppendText(path);
         sr.WriteLine(line);
         sr.Close();
