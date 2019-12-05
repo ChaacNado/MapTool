@@ -8,6 +8,7 @@ public class PCGScript : MonoBehaviour
 {
     public GameObject board;
     public Sprite wallSprite;
+    public GameObject status;
     int RoadChance;
     int GridSize;
     int minBuildingWidth;
@@ -504,7 +505,10 @@ public class PCGScript : MonoBehaviour
             Tuple<int, int> tile = junction.GetComponent<JunctionScript>().GetTile();
             ExportScript.WriteJunctionToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y);
         }
-
-        TestImportScript.ReadString();
+        if (ExportScript.path.Length > 40)
+            status.GetComponent<Text>().text = "Map exported to: ..." + ExportScript.path.Substring(ExportScript.path.Length-40);
+        else
+            status.GetComponent<Text>().text = "Map exported to: " + ExportScript.path;
+        //TestImportScript.ReadString();
     }
 }
