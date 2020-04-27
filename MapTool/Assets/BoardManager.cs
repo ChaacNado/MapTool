@@ -177,6 +177,7 @@ public class BoardManager : MonoBehaviour
 
     public void RemoveRoad(GameObject road, int roadID)
     {
+        //Feed tiles to a building by first finding a building. If there is no building, destroy the road entirely! MUAHAHAHAHAHAHAHAH
         foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
         {
             FreeTile(tile.Item1, tile.Item2);
@@ -267,6 +268,28 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    public void RemoveBuildings(float randomValue)
+    {
+        foreach (GameObject building in buildings)
+        {
+            foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
+            {
+                if (tile.Item1 == 0 || tile.Item2 == 0 || tile.Item1 == boardRows - 1 || tile.Item2 == boardColumns - 1)
+                {
+                    if (UnityEngine.Random.value < randomValue)
+                    {
+                        foreach (Tuple<int, int> tileAgain in building.GetComponent<BuildingScript>().GetTiles())
+                        {
+                            Destroy(tiles[tileAgain.Item1, tileAgain.Item2]);
+                        }
+                        Destroy(building);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     public int SplitBuilding(int i, int splitPoint, string direction)
     {
         buildings.Add(Instantiate(buildingPrefab, transform));
@@ -299,8 +322,8 @@ public class BoardManager : MonoBehaviour
         {
             buildings[i].GetComponent<BuildingScript>().RemoveTile(tile.Item1, tile.Item2);
         }
-        buildingIndex++;
-        return (buildingIndex-1);
+
+        return buildingIndex++;
     }
 
     public void MakeWalls()

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class PCGScript : MonoBehaviour
 {
-    public GameObject board;
+    public BoardManager board;
     public Sprite wallSprite;
     public GameObject status;
     int RoadChance;
@@ -15,50 +15,63 @@ public class PCGScript : MonoBehaviour
     int minBuildingHeight;
     int maxBuildingWidth;
     int maxBuildingHeight;
+    float RemoveBuildingChance;
     bool[,] grid;
     int rows;
     int columns;
     string fileName;
+
+
     // Start is called before the first frame update
     void Start()
     {
-        GameObject.FindWithTag("RoadChance").GetComponent<InputField>().onEndEdit.AddListener(delegate
-        {
-            RoadChance = int.Parse(GameObject.FindWithTag("RoadChance").GetComponent<InputField>().text);
-        });
-        GameObject.FindWithTag("GridSize").GetComponent<InputField>().onEndEdit.AddListener(delegate
-        {
-            GridSize = int.Parse(GameObject.FindWithTag("GridSize").GetComponent<InputField>().text);
-        });
+        //GameObject.FindWithTag("RoadChance").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        //{
+        //    RoadChance = int.Parse(GameObject.FindWithTag("RoadChance").GetComponent<InputField>().text);
+        //});
+        //GameObject.FindWithTag("GridSize").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        //{
+        //    GridSize = int.Parse(GameObject.FindWithTag("GridSize").GetComponent<InputField>().text);
+        //});
 
-        GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().onEndEdit.AddListener(delegate
-        {
-            minBuildingWidth = int.Parse(GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().text);
-        });
-        GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().onEndEdit.AddListener(delegate
-        {
-            minBuildingHeight = int.Parse(GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().text);
-        });
+        //GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        //{
+        //    minBuildingWidth = int.Parse(GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().text);
+        //});
+        //GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        //{
+        //    minBuildingHeight = int.Parse(GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().text);
+        //});
 
-        GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().onEndEdit.AddListener(delegate
-        {
-            maxBuildingWidth = int.Parse(GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().text);
-        });
-        GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().onEndEdit.AddListener(delegate
-        {
-            maxBuildingHeight = int.Parse(GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().text);
-        });
-        GameObject.FindWithTag("FileName").GetComponent<InputField>().onEndEdit.AddListener(delegate
-        {
-            fileName = GameObject.FindWithTag("FileName").GetComponent<InputField>().text;
-        });
+        //GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        //{
+        //    maxBuildingWidth = int.Parse(GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().text);
+        //});
+        //GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        //{
+        //    maxBuildingHeight = int.Parse(GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().text);
+        //});
+        //GameObject.FindWithTag("FileName").GetComponent<InputField>().onEndEdit.AddListener(delegate
+        //{
+        //    fileName = GameObject.FindWithTag("FileName").GetComponent<InputField>().text;
+        //});
     }
 
     public void Generate()
     {
-        board.GetComponent<BoardManager>().Prepare(GridSize);
-        rows = board.GetComponent<BoardManager>().boardRows;
-        columns = board.GetComponent<BoardManager>().boardColumns;
+        RoadChance = int.Parse(GameObject.FindWithTag("RoadChance").GetComponent<InputField>().text);
+        GridSize = int.Parse(GameObject.FindWithTag("GridSize").GetComponent<InputField>().text);
+        minBuildingWidth = int.Parse(GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().text);
+        minBuildingHeight = int.Parse(GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().text);
+        maxBuildingWidth = int.Parse(GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().text);
+        maxBuildingHeight = int.Parse(GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().text);
+        RemoveBuildingChance = float.Parse(GameObject.FindWithTag("RemoveBuildingChance").GetComponent<InputField>().text);
+
+        fileName = GameObject.FindWithTag("FileName").GetComponent<InputField>().text;
+
+        board.Prepare(GridSize);
+        rows = board.boardRows;
+        columns = board.boardColumns;
         int stepsSinceLastRoad = minBuildingWidth;
         for (int i = minBuildingWidth; i < rows - minBuildingWidth; i++)
         {
@@ -93,16 +106,42 @@ public class PCGScript : MonoBehaviour
             }
             stepsSinceLastRoad++;
         }
-        board.GetComponent<BoardManager>().GenerateRoads();
-        board.GetComponent<BoardManager>().GenerateJunctions();
-        RemoveRoads();
-        board.GetComponent<BoardManager>().FixJunctions();
-        board.GetComponent<BoardManager>().GenerateBuildings();
-        SplitBuildings();
-        board.GetComponent<BoardManager>().PaintBuildings();
-        board.GetComponent<BoardManager>().MakeWalls();
-        GenerateInnerWalls();
-        //board.GetComponent<BoardManager>().GenerateSpaces();
+
+        if (GameObject.FindWithTag("GenerateRoads").GetComponent<Toggle>().isOn)
+        {
+            board.GenerateRoads();
+            board.GenerateJunctions();
+        }
+        if (GameObject.FindWithTag("GenerateBuildings").GetComponent<Toggle>().isOn)
+        {
+            board.GenerateBuildings();
+        }
+        if (GameObject.FindWithTag("RemoveOuterBuildings").GetComponent<Toggle>().isOn)
+        {
+            board.RemoveBuildings(RemoveBuildingChance/100f);
+        }
+        if (GameObject.FindWithTag("RemoveRoads").GetComponent<Toggle>().isOn)
+        {
+            RemoveRoads();
+            board.FixJunctions();
+        }
+        if (GameObject.FindWithTag("GenerateSubBuildings").GetComponent<Toggle>().isOn)
+        {
+            SplitBuildings();
+        }
+        if (GameObject.FindWithTag("PaintBuildings").GetComponent<Toggle>().isOn)
+        {
+            board.PaintBuildings();
+        }
+        if (GameObject.FindWithTag("GenerateOuterWalls").GetComponent<Toggle>().isOn)
+        {
+            board.MakeWalls();
+        }
+        if (GameObject.FindWithTag("GenerateInnerWalls").GetComponent<Toggle>().isOn)
+        {
+            GenerateInnerWalls();
+        }
+        //board.GenerateSpaces();
     }
 
     void FillHer(int i, string direction)
@@ -112,15 +151,15 @@ public class PCGScript : MonoBehaviour
             case "row":
                 for (int y = 0; y < columns; y++)
                 {
-                    board.GetComponent<BoardManager>().tiles[i, y].GetComponent<SpriteRenderer>().color = Color.black;
-                    if (board.GetComponent<BoardManager>().tiles[i, y].tag == "Road")
+                    board.tiles[i, y].GetComponent<SpriteRenderer>().color = Color.black;
+                    if (board.tiles[i, y].tag == "Road")
                     {
-                        board.GetComponent<BoardManager>().tiles[i, y].tag = "Junction";
-                        board.GetComponent<BoardManager>().AddJunction(i, y);
+                        board.tiles[i, y].tag = "Junction";
+                        board.AddJunction(i, y);
                     }
                     else
                     {
-                        board.GetComponent<BoardManager>().tiles[i, y].tag = "Road";
+                        board.tiles[i, y].tag = "Road";
                     }
                 }
                 break;
@@ -128,15 +167,15 @@ public class PCGScript : MonoBehaviour
             case "column":
                 for (int x = 0; x < rows; x++)
                 {
-                    board.GetComponent<BoardManager>().tiles[x, i].GetComponent<SpriteRenderer>().color = Color.black;
-                    if (board.GetComponent<BoardManager>().tiles[x, i].tag == "Road")
+                    board.tiles[x, i].GetComponent<SpriteRenderer>().color = Color.black;
+                    if (board.tiles[x, i].tag == "Road")
                     {
-                        board.GetComponent<BoardManager>().tiles[x, i].tag = "Junction";
-                        board.GetComponent<BoardManager>().AddJunction(x, i);
+                        board.tiles[x, i].tag = "Junction";
+                        board.AddJunction(x, i);
                     }
                     else
                     {
-                        board.GetComponent<BoardManager>().tiles[x, i].tag = "Road";
+                        board.tiles[x, i].tag = "Road";
                     }
                 }
                 break;
@@ -146,10 +185,10 @@ public class PCGScript : MonoBehaviour
     public bool ConfirmRoadConnectivity(Tuple<int, int> dontCheck1, Tuple<int, int> dontCheck2)
     {
         grid = new bool[rows, columns];
-        int startX = board.GetComponent<BoardManager>().roads[0].GetComponent<RoadScript>().GetTiles()[0].Item1;
-        int startY = board.GetComponent<BoardManager>().roads[0].GetComponent<RoadScript>().GetTiles()[0].Item2;
+        int startX = board.roads[0].GetComponent<RoadScript>().GetTiles()[0].Item1;
+        int startY = board.roads[0].GetComponent<RoadScript>().GetTiles()[0].Item2;
         RoadWalkerAI(startX, startY, dontCheck1, dontCheck2);
-        foreach (GameObject road in board.GetComponent<BoardManager>().roads)
+        foreach (GameObject road in board.roads)
         {
             foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
             {
@@ -185,8 +224,8 @@ public class PCGScript : MonoBehaviour
 
             if (position.Item1 + 1 < rows)
             {
-                if (board.GetComponent<BoardManager>().tiles[position.Item1 + 1, position.Item2].tag == "Road"
-                    || board.GetComponent<BoardManager>().tiles[position.Item1 + 1, position.Item2].tag == "Junction")
+                if (board.tiles[position.Item1 + 1, position.Item2].tag == "Road"
+                    || board.tiles[position.Item1 + 1, position.Item2].tag == "Junction")
                 {
                     //Right
                     if (grid[position.Item1 + 1, position.Item2] == false)
@@ -199,8 +238,8 @@ public class PCGScript : MonoBehaviour
 
             if (position.Item1 - 1 >= 0)
             {
-                if (board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Road"
-                || board.GetComponent<BoardManager>().tiles[position.Item1 - 1, position.Item2].tag == "Junction")
+                if (board.tiles[position.Item1 - 1, position.Item2].tag == "Road"
+                || board.tiles[position.Item1 - 1, position.Item2].tag == "Junction")
                 {
                     //Left
                     if (grid[position.Item1 - 1, position.Item2] == false)
@@ -220,8 +259,8 @@ public class PCGScript : MonoBehaviour
 
             if (position.Item2 + 1 < columns)
             {
-                if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 + 1].tag == "Road"
-                || board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 + 1].tag == "Junction")
+                if (board.tiles[position.Item1, position.Item2 + 1].tag == "Road"
+                || board.tiles[position.Item1, position.Item2 + 1].tag == "Junction")
                 {
                     //Up
                     if (grid[position.Item1, position.Item2 + 1] == false)
@@ -241,8 +280,8 @@ public class PCGScript : MonoBehaviour
 
             if (position.Item2 - 1 >= 0)
             {
-                if (board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Road"
-                || board.GetComponent<BoardManager>().tiles[position.Item1, position.Item2 - 1].tag == "Junction")
+                if (board.tiles[position.Item1, position.Item2 - 1].tag == "Road"
+                || board.tiles[position.Item1, position.Item2 - 1].tag == "Junction")
                 {
                     //Down
                     if (grid[position.Item1, position.Item2 - 1] == false)
@@ -268,18 +307,18 @@ public class PCGScript : MonoBehaviour
 
     public void RemoveRoads()
     {
-        foreach (GameObject junction in board.GetComponent<BoardManager>().junctions)
+        foreach (GameObject junction in board.junctions)
         {
             if (junction.GetComponent<JunctionScript>().GetRoads().Count > 0)
             {
                 int roadID = junction.GetComponent<JunctionScript>().GetRoads()[UnityEngine.Random.Range(0, junction.GetComponent<JunctionScript>().GetRoads().Count)];
-                foreach (GameObject road in board.GetComponent<BoardManager>().roads)
+                foreach (GameObject road in board.roads)
                 {
                     if (road.GetComponent<RoadScript>().GetID() == roadID)
                     {
                         if (ConfirmRoadConnectivity(road.GetComponent<RoadScript>().GetFirstTile(), road.GetComponent<RoadScript>().GetLastTile()))
                         {
-                            board.GetComponent<BoardManager>().RemoveRoad(road, roadID);
+                            board.RemoveRoad(road, roadID);
                         }
                         break;
                     }
@@ -290,7 +329,7 @@ public class PCGScript : MonoBehaviour
 
     public void SplitBuildings()
     {
-        int buildingCount = board.GetComponent<BoardManager>().buildings.Count;
+        int buildingCount = board.buildings.Count;
         List<int> newBuildings = new List<int>();
         int index = 0;
         do
@@ -299,59 +338,79 @@ public class PCGScript : MonoBehaviour
             {
                 while (true)
                 {
+                    //Set lowX values to highest possible, to ensure that we get lower values in the algorithm.
                     int lowRow = rows;
                     int lowColumn = columns;
+                    //Set maxX values to lowest possible, to ensure that we get higher values in the algorithm.
                     int maxRow = 0;
                     int maxColumn = 0;
+                    //Splitpoint is an enigma.
                     int splitPoint = 0;
+                    //Direction is a mystery.
                     string direction = "";
-                    foreach (Tuple<int, int> tile in board.GetComponent<BoardManager>().buildings[i].GetComponent<BuildingScript>().GetTiles())
+                    //Check all tiles in the building
+                    foreach (Tuple<int, int> tile in board.buildings[i].GetComponent<BuildingScript>().GetTiles())
                     {
+                        //If the tile is further to the right than any of the other tiles, then save its value.
                         if (maxRow < tile.Item1)
                         {
                             maxRow = tile.Item1;
                         }
+                        //If the tile is further to the left than any of the other tiles, then save its value.
                         else if (lowRow > tile.Item1)
                         {
                             lowRow = tile.Item1;
                         }
+                        //If the tile is further to the up than any of the other tiles, then save its value.
                         if (maxColumn < tile.Item2)
                         {
                             maxColumn = tile.Item2;
                         }
+                        //If the tile is further to the down than any of the other tiles, then save its value.
                         else if (lowColumn > tile.Item2)
                         {
                             lowColumn = tile.Item2;
                         }
                     }
+                    //Get the building's width and height based on these values (maybe we should just save that in the building when it's created...)
                     int width = maxRow - lowRow;
                     int height = maxColumn - lowColumn;
+
+                    //If the building is wide enough to be split vertically.
                     if (width >= minBuildingWidth * 2)
                     {
+                        //Make the decision to split it vertically, and get a random value fitting the limits.
                         direction = "row";
                         splitPoint = UnityEngine.Random.Range(lowRow + minBuildingWidth, maxRow - minBuildingWidth);
                     }
+                    //If the building is long enough to be split horizontally.
                     else if (height >= minBuildingHeight * 2)
                     {
+                        //Make the decision to split it horizontally, and get a random value fitting the limits.
                         direction = "column";
                         splitPoint = UnityEngine.Random.Range(lowColumn + minBuildingHeight, maxColumn - minBuildingHeight);
                     }
+                    //If it's not large enough, let's not split this building.
                     else
                     {
                         newBuildings.Remove(i);
                         break;
                     }
-                    newBuildings.Add(board.GetComponent<BoardManager>().SplitBuilding(i, splitPoint, direction));
+                    //Run the SplitBuilding method in the board script!
+                    newBuildings.Add(board.SplitBuilding(i, splitPoint, direction));
                 }
             }
+            //Start the next iteration of the algorithm from the last building of the last iteration. #nicesentence
             index = buildingCount;
+            //Increase the buidling count to accomodate the number of buildings we just added.
             buildingCount += newBuildings.Count;
+        //Keep iterating untill we haven't added any more sub-buildings.
         } while (newBuildings.Count > 0);
     }
 
     public void GenerateInnerWalls()
     {
-        foreach (GameObject building in board.GetComponent<BoardManager>().buildings)
+        foreach (GameObject building in board.buildings)
         {
             int lowRow = rows;
             int lowColumn = columns;
@@ -397,9 +456,9 @@ public class PCGScript : MonoBehaviour
                             for (int y = 0; y < 2; y++)
                             {
                                 if (x == 0)
-                                    board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 1);
+                                    board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 1);
                                 else
-                                    board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 2);
+                                    board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 2);
                             }
                         }
                     }
@@ -409,8 +468,8 @@ public class PCGScript : MonoBehaviour
                         {
                             if (tile.Item2 == randomColumn)
                             {
-                                board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 0].GetComponent<TileScript>().AddWall(wallSprite, 4);
-                                board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[0, 0].GetComponent<TileScript>().AddWall(wallSprite, 4);
+                                board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 0].GetComponent<TileScript>().AddWall(wallSprite, 4);
+                                board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[0, 0].GetComponent<TileScript>().AddWall(wallSprite, 4);
                             }
                         }
                     }
@@ -435,9 +494,9 @@ public class PCGScript : MonoBehaviour
                             for (int y = 0; y < 2; y++)
                             {
                                 if (y == 0)
-                                    board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 4);
+                                    board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 4);
                                 else
-                                    board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 8);
+                                    board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[x, y].GetComponent<TileScript>().AddWall(wallSprite, 8);
                             }
                         }
                     }
@@ -447,8 +506,8 @@ public class PCGScript : MonoBehaviour
                         {
                             if (tile.Item1 == randomRow)
                             {
-                                board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 0].GetComponent<TileScript>().AddWall(wallSprite, 2);
-                                board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 1].GetComponent<TileScript>().AddWall(wallSprite, 2);
+                                board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 0].GetComponent<TileScript>().AddWall(wallSprite, 2);
+                                board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles[1, 1].GetComponent<TileScript>().AddWall(wallSprite, 2);
                             }
                         }
                     }
@@ -458,22 +517,22 @@ public class PCGScript : MonoBehaviour
     }
     public void Merge()
     {
-        board.GetComponent<BoardManager>().Combine();
+        board.Combine();
     }
 
     public void Export()
     {
         ExportScript.OpenFolderPanel(fileName);
-        foreach (GameObject building in board.GetComponent<BoardManager>().buildings)
+        foreach (GameObject building in board.buildings)
         {
             ExportScript.WriteBuildingToFile(building.GetComponent<BuildingScript>().GetID());
             foreach (Tuple<int, int> tile in building.GetComponent<BuildingScript>().GetTiles())
             {
-                foreach (GameObject wall in board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().walls)
+                foreach (GameObject wall in board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().walls)
                 {
                     ExportScript.WriteWallsToFile(wall.transform.position.x, wall.transform.position.y, wall.GetComponent<SpriteRenderer>().size.x, wall.GetComponent<SpriteRenderer>().size.y);
                 }
-                foreach (GameObject innerTile in board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles)
+                foreach (GameObject innerTile in board.tiles[tile.Item1, tile.Item2].GetComponent<TileScript>().tiles)
                 {
                     foreach (GameObject wall in innerTile.GetComponent<TileScript>().walls)
                     {
@@ -483,7 +542,7 @@ public class PCGScript : MonoBehaviour
             }
         }
 
-        foreach (GameObject road in board.GetComponent<BoardManager>().roads)
+        foreach (GameObject road in board.roads)
         {
             string alignment = "";
             if (road.GetComponent<RoadScript>().GetFirstTile().Item1 == road.GetComponent<RoadScript>().GetLastTile().Item1)
@@ -496,17 +555,17 @@ public class PCGScript : MonoBehaviour
             }
             foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
             {
-                ExportScript.WriteRoadToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y, alignment);
+                ExportScript.WriteRoadToFile(board.tiles[tile.Item1, tile.Item2].transform.position.x, board.tiles[tile.Item1, tile.Item2].transform.position.y, alignment);
             }
         }
 
-        foreach (GameObject junction in board.GetComponent<BoardManager>().junctions)
+        foreach (GameObject junction in board.junctions)
         {
             Tuple<int, int> tile = junction.GetComponent<JunctionScript>().GetTile();
-            ExportScript.WriteJunctionToFile(board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.x, board.GetComponent<BoardManager>().tiles[tile.Item1, tile.Item2].transform.position.y);
+            ExportScript.WriteJunctionToFile(board.tiles[tile.Item1, tile.Item2].transform.position.x, board.tiles[tile.Item1, tile.Item2].transform.position.y);
         }
         if (ExportScript.path.Length > 40)
-            status.GetComponent<Text>().text = "Map exported to: ..." + ExportScript.path.Substring(ExportScript.path.Length-40);
+            status.GetComponent<Text>().text = "Map exported to: ..." + ExportScript.path.Substring(ExportScript.path.Length - 40);
         else
             status.GetComponent<Text>().text = "Map exported to: " + ExportScript.path;
         //TestImportScript.ReadString();
