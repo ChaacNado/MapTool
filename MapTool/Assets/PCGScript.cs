@@ -10,7 +10,8 @@ public class PCGScript : MonoBehaviour
     public Sprite wallSprite;
     public GameObject status;
     int RoadChance;
-    int GridSize;
+    int GridSizeX;
+    int GridSizeY;
     int minBuildingWidth;
     int minBuildingHeight;
     int maxBuildingWidth;
@@ -59,8 +60,8 @@ public class PCGScript : MonoBehaviour
 
     public void Generate()
     {
-        RoadChance = int.Parse(GameObject.FindWithTag("RoadChance").GetComponent<InputField>().text);
-        GridSize = int.Parse(GameObject.FindWithTag("GridSize").GetComponent<InputField>().text);
+        GridSizeX = int.Parse(GameObject.FindWithTag("GridSizeX").GetComponent<InputField>().text);
+        GridSizeY = int.Parse(GameObject.FindWithTag("GridSizeY").GetComponent<InputField>().text);
         minBuildingWidth = int.Parse(GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().text);
         minBuildingHeight = int.Parse(GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().text);
         maxBuildingWidth = int.Parse(GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().text);
@@ -69,62 +70,45 @@ public class PCGScript : MonoBehaviour
 
         fileName = GameObject.FindWithTag("FileName").GetComponent<InputField>().text;
 
-        board.Prepare(GridSize);
+        board.Prepare(GridSizeX, GridSizeY);
         rows = board.boardRows;
         columns = board.boardColumns;
-        int stepsSinceLastRoad = minBuildingWidth;
-        for (int i = minBuildingWidth; i < rows - minBuildingWidth; i++)
-        {
-            if (stepsSinceLastRoad >= maxBuildingWidth)
-            {
-                FillHer(i, "row");
-                i += minBuildingWidth;
-                stepsSinceLastRoad = minBuildingWidth;
-            }
-            else if (UnityEngine.Random.Range(0, 100) < RoadChance)
-            {
-                FillHer(i, "row");
-                i += minBuildingWidth;
-                stepsSinceLastRoad = minBuildingWidth;
-            }
-            stepsSinceLastRoad++;
-        }
-        stepsSinceLastRoad = minBuildingHeight;
-        for (int j = minBuildingHeight; j < columns - minBuildingHeight; j++)
-        {
-            if (stepsSinceLastRoad >= maxBuildingHeight)
-            {
-                FillHer(j, "column");
-                j += minBuildingHeight;
-                stepsSinceLastRoad = minBuildingHeight;
-            }
-            else if (UnityEngine.Random.Range(0, 100) < RoadChance)
-            {
-                FillHer(j, "column");
-                j += minBuildingHeight;
-                stepsSinceLastRoad = minBuildingHeight;
-            }
-            stepsSinceLastRoad++;
-        }
 
         if (GameObject.FindWithTag("GenerateRoads").GetComponent<Toggle>().isOn)
         {
+            int buildingSize = UnityEngine.Random.Range(minBuildingWidth + 1, maxBuildingWidth + 2);
+            for (int i = buildingSize; i < rows - minBuildingWidth + 1; i += buildingSize)
+            {
+                FillHer(i, "row");
+                buildingSize = UnityEngine.Random.Range(minBuildingWidth + 1, maxBuildingWidth + 2);
+            }
+
+            buildingSize = UnityEngine.Random.Range(minBuildingHeight, maxBuildingHeight);
+            for (int j = buildingSize; j < columns - minBuildingHeight + 1; j += buildingSize)
+            {
+                FillHer(j, "column");
+                buildingSize = UnityEngine.Random.Range(minBuildingHeight + 1, maxBuildingHeight + 2);
+            }
             board.GenerateRoads();
             board.GenerateJunctions();
         }
+
         if (GameObject.FindWithTag("GenerateBuildings").GetComponent<Toggle>().isOn)
         {
             board.GenerateBuildings();
+            board.GiveRoadNeighbours();
         }
         if (GameObject.FindWithTag("RemoveOuterBuildings").GetComponent<Toggle>().isOn)
         {
-            board.RemoveBuildings(RemoveBuildingChance/100f);
+            board.RemoveBuildings(RemoveBuildingChance / 100f);
         }
+
         if (GameObject.FindWithTag("RemoveRoads").GetComponent<Toggle>().isOn)
         {
             RemoveRoads();
             board.FixJunctions();
         }
+
         if (GameObject.FindWithTag("GenerateSubBuildings").GetComponent<Toggle>().isOn)
         {
             SplitBuildings();
@@ -375,20 +359,22 @@ public class PCGScript : MonoBehaviour
                     //Get the building's width and height based on these values (maybe we should just save that in the building when it's created...)
                     int width = maxRow - lowRow;
                     int height = maxColumn - lowColumn;
-
-                    //If the building is wide enough to be split vertically.
-                    if (width >= minBuildingWidth * 2)
-                    {
-                        //Make the decision to split it vertically, and get a random value fitting the limits.
-                        direction = "row";
-                        splitPoint = UnityEngine.Random.Range(lowRow + minBuildingWidth, maxRow - minBuildingWidth);
-                    }
-                    //If the building is long enough to be split horizontally.
-                    else if (height >= minBuildingHeight * 2)
-                    {
-                        //Make the decision to split it horizontally, and get a random value fitting the limits.
-                        direction = "column";
-                        splitPoint = UnityEngine.Random.Range(lowColumn + minBuildingHeight, maxColumn - minBuildingHeight);
+                    if (width >= minBuildingWidth * 2 || height >= minBuildingHeight * 2)
+                    {                 
+                        //If the building is wide enough to be split vertically.
+                        if (width >= minBuildingWidth * 2)
+                        {
+                            //Make the decision to split it vertically, and get a random value fitting the limits.
+                            direction = "row";
+                            splitPoint = UnityEngine.Random.Range(lowRow + minBuildingWidth, maxRow - minBuildingWidth);
+                        }
+                        //If the building is long enough to be split horizontally.
+                        if (height >= minBuildingHeight * 2)
+                        {
+                            //Make the decision to split it horizontally, and get a random value fitting the limits.
+                            direction = "column";
+                            splitPoint = UnityEngine.Random.Range(lowColumn + minBuildingHeight, maxColumn - minBuildingHeight);
+                        }
                     }
                     //If it's not large enough, let's not split this building.
                     else
@@ -404,7 +390,7 @@ public class PCGScript : MonoBehaviour
             index = buildingCount;
             //Increase the buidling count to accomodate the number of buildings we just added.
             buildingCount += newBuildings.Count;
-        //Keep iterating untill we haven't added any more sub-buildings.
+            //Keep iterating untill we haven't added any more sub-buildings.
         } while (newBuildings.Count > 0);
     }
 

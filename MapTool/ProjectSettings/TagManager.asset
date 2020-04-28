@@ -23,6 +23,9 @@ TagManager:
   - GenerateInnerWalls
   - RemoveOuterBuildings
   - RemoveBuildingChance
+  - Emptied
+  - GridSizeX
+  - GridSizeY
   layers:
   - Default
   - TransparentFX

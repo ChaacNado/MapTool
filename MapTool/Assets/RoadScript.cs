@@ -44,6 +44,33 @@ public class RoadScript : MonoBehaviour
         return tiles;
     }
 
+    public void GiveNeighbour(int buildingID)
+    {
+        foreach(int neighbour in neighbouringBuildings)
+        {
+            if (neighbour == buildingID)
+                return;
+        }
+        neighbouringBuildings.Add(buildingID);
+    }
+
+    public void RemoveNeighbour(int buildingID)
+    {
+        neighbouringBuildings.Remove(buildingID);
+    }
+
+    public List<int> GetNeighbours()
+    {
+        return neighbouringBuildings;
+    }
+
+    public int GetRandomBuilding()
+    {
+        if(neighbouringBuildings.Count > 1)
+            return neighbouringBuildings[UnityEngine.Random.Range(0, neighbouringBuildings.Count)];
+        return -1;
+    }
+
     // Update is called once per frame
     void Update()
     {

@@ -12,6 +12,7 @@ public class TileScript : MonoBehaviour
     public int wallDirection = 0; //1 = L, 2 = R, 4 = U, 8 = D, 3 = LR, 5 = LU, 6 = RU, 7 = LRU, 9 = LD, 10 = RD, 11 = LRD, 12 = UD, 13 = LUD, 14 = RUD, 15 = LRUD
     public bool hasDoor;
     public bool Parent;
+    public int buildingID;
 
     public GameObject wallPrefab;
     public GameObject tilePrefab;
@@ -50,8 +51,9 @@ public class TileScript : MonoBehaviour
         numberOfWalls++;
     }
 
-    public void MakeBuildingRoomParent()
+    public void MakeBuildingRoomParent(int buildingID)
     {
+        this.buildingID = buildingID;
         if (!Parent)
         {
             Parent = true;

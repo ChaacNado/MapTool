@@ -39,7 +39,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void Prepare(int GridSize)
+    public void Prepare(int GridSizeX, int GridSizeY)
     {
         for (int i = 0; i < boardRows; i++)
         {
@@ -68,9 +68,9 @@ public class BoardManager : MonoBehaviour
         roadIndex = 0;
         junctionIndex = 0;
         buildingIndex = 0;
-        boardRows = GridSize;
-        boardColumns = GridSize;
-        tiles = new GameObject[GridSize, GridSize];
+        boardRows = GridSizeX;
+        boardColumns = GridSizeY;
+        tiles = new GameObject[boardRows, boardColumns];
         roads = new List<GameObject>();
         junctions = new List<GameObject>();
         for (int i = 0; i < boardRows; i++)
@@ -175,22 +175,59 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    public void GiveRoadNeighbours()
+    {
+        foreach (GameObject road in roads)
+        {
+            foreach (Tuple<int, int> roadTile in road.GetComponent<RoadScript>().GetTiles())
+            {
+                if (roadTile.Item1 + 1 < boardRows && tiles[roadTile.Item1 + 1, roadTile.Item2].tag == "Occupado")
+                {
+                    road.GetComponent<RoadScript>().GiveNeighbour(tiles[roadTile.Item1 + 1, roadTile.Item2].GetComponent<TileScript>().buildingID);
+                }
+                if (roadTile.Item1 - 1 >= 0 && tiles[roadTile.Item1 - 1, roadTile.Item2].tag == "Occupado")
+                {
+                    road.GetComponent<RoadScript>().GiveNeighbour(tiles[roadTile.Item1 - 1, roadTile.Item2].GetComponent<TileScript>().buildingID);
+                }
+                if (roadTile.Item2 + 1 < boardColumns && tiles[roadTile.Item1, roadTile.Item2 + 1].tag == "Occupado")
+                {
+                    road.GetComponent<RoadScript>().GiveNeighbour(tiles[roadTile.Item1, roadTile.Item2 + 1].GetComponent<TileScript>().buildingID);
+                }
+                if (roadTile.Item2 - 1 >= 0 && tiles[roadTile.Item1, roadTile.Item2 - 1].tag == "Occupado")
+                {
+                    road.GetComponent<RoadScript>().GiveNeighbour(tiles[roadTile.Item1, roadTile.Item2 - 1].GetComponent<TileScript>().buildingID);
+                }
+            }
+        }
+    }
+
     public void RemoveRoad(GameObject road, int roadID)
     {
         //Feed tiles to a building by first finding a building. If there is no building, destroy the road entirely! MUAHAHAHAHAHAHAHAH
-        foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
+        int buildingToEatMe = road.GetComponent<RoadScript>().GetRandomBuilding();
+        if (buildingToEatMe == -1)
         {
-            FreeTile(tile.Item1, tile.Item2);
+            //foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
+            //{
+            //    FreeTile(tile.Item1, tile.Item2);
+            //}
         }
-        for (int i = 0; i < junctions.Count; i++)
+        else
         {
-            if (junctions[i].GetComponent<JunctionScript>().GetRoads().Contains(roadID))
+            foreach (Tuple<int, int> tile in road.GetComponent<RoadScript>().GetTiles())
             {
-                junctions[i].GetComponent<JunctionScript>().RemoveRoad(roadID);
+                FeedTile(tile.Item1, tile.Item2, buildingToEatMe);
             }
+            for (int i = 0; i < junctions.Count; i++)
+            {
+                if (junctions[i].GetComponent<JunctionScript>().GetRoads().Contains(roadID))
+                {
+                    junctions[i].GetComponent<JunctionScript>().RemoveRoad(roadID);
+                }
+            }
+            roads.Remove(road);
+            roadIndex--;
         }
-        roads.Remove(road);
-        roadIndex--; //Dunno if will be used, but w/e
     }
 
     public void FixJunctions()
@@ -207,6 +244,51 @@ public class BoardManager : MonoBehaviour
                 RemoveDeadEnd(i);
                 i--;
             }
+        }
+
+        GameObject[] emptyTiles = GameObject.FindGameObjectsWithTag("Emptied");
+        for (int i = 0; i < emptyTiles.Length; i++)
+        {
+            Debug.Log(emptyTiles[i]);
+            TileScript tile = emptyTiles[i].GetComponent<TileScript>();
+            List<Tuple<int, int>> foundTiles = new List<Tuple<int, int>>();
+            if (tile.position.Item1 + 1 < boardRows && tiles[tile.position.Item1 + 1, tile.position.Item2].tag == "Occupado")
+            {
+                foundTiles.Add(new Tuple<int, int>(tile.position.Item1 + 1, tile.position.Item2));
+            }
+            if (tile.position.Item1 - 1 >= 0 && tiles[tile.position.Item1 - 1, tile.position.Item2].tag == "Occupado")
+            {
+                foundTiles.Add(new Tuple<int, int>(tile.position.Item1 - 1, tile.position.Item2));
+            }
+            if (tile.position.Item2 + 1 < boardColumns && tiles[tile.position.Item1, tile.position.Item2 + 1].tag == "Occupado")
+            {
+                foundTiles.Add(new Tuple<int, int>(tile.position.Item1, tile.position.Item2 + 1));
+            }
+            if (tile.position.Item2 - 1 >= 0 && tiles[tile.position.Item1, tile.position.Item2 - 1].tag == "Occupado")
+            {
+                foundTiles.Add(new Tuple<int, int>(tile.position.Item1, tile.position.Item2 - 1));
+            }
+
+            if (foundTiles.Count > 0)
+            {
+                int buildingXID = 0;
+                for (int x = 0; x < foundTiles.Count; x++)
+                {
+                    buildingXID = tiles[foundTiles[x].Item1, foundTiles[x].Item2].GetComponent<TileScript>().buildingID;
+                    for (int y = x+1; y < foundTiles.Count; y++)
+                    {
+                        int buildingYID = tiles[foundTiles[y].Item1, foundTiles[y].Item2].GetComponent<TileScript>().buildingID;
+                        if (buildingXID == buildingYID)
+                        {
+                            x = foundTiles.Count;
+                            break;
+                        }
+                    }
+                }
+                FeedTile(tile.position.Item1, tile.position.Item2, buildingXID);
+            }
+            else
+                Destroy(emptyTiles[i]);
         }
     }
 
@@ -234,8 +316,15 @@ public class BoardManager : MonoBehaviour
 
     public void FreeTile(int x, int y)
     {
-        tiles[x, y].tag = "Untagged";
+        tiles[x, y].tag = "Emptied";
         tiles[x, y].GetComponent<SpriteRenderer>().color = Color.white;
+    }
+
+    public void FeedTile(int x, int y, int toBuildingID)
+    {
+        buildings[toBuildingID].GetComponent<BuildingScript>().AddTile(x, y);
+        tiles[x, y].tag = "Occupado";
+        tiles[x, y].GetComponent<TileScript>().MakeBuildingRoomParent(toBuildingID);
     }
 
     public void PaintBuildings()
@@ -278,6 +367,18 @@ public class BoardManager : MonoBehaviour
                 {
                     if (UnityEngine.Random.value < randomValue)
                     {
+                        foreach (GameObject road in roads)
+                        {
+                            List<int> neighbours = road.GetComponent<RoadScript>().GetNeighbours();
+                            for (int i = 0; i < neighbours.Count; i++)
+                            {
+                                if (building.GetComponent<BuildingScript>().GetID() == neighbours[i])
+                                {
+                                    road.GetComponent<RoadScript>().RemoveNeighbour(neighbours[i]);
+                                    i--;
+                                }
+                            }
+                        }
                         foreach (Tuple<int, int> tileAgain in building.GetComponent<BuildingScript>().GetTiles())
                         {
                             Destroy(tiles[tileAgain.Item1, tileAgain.Item2]);
@@ -395,7 +496,7 @@ public class BoardManager : MonoBehaviour
             Tuple<int, int> move = null;
             building.GetComponent<BuildingScript>().AddTile(position.Item1, position.Item2);
             tiles[position.Item1, position.Item2].tag = "Occupado";
-            tiles[position.Item1, position.Item2].GetComponent<TileScript>().MakeBuildingRoomParent();
+            tiles[position.Item1, position.Item2].GetComponent<TileScript>().MakeBuildingRoomParent(building.GetComponent<BuildingScript>().GetID());
 
             if (position.Item1 + 1 < boardRows)
             {
@@ -522,7 +623,6 @@ public class BoardManager : MonoBehaviour
                 {
                     itHasHappened = true;
                     buildingsOnAColumn = buildings.Count;
-                    Debug.Log(buildingsOnAColumn);
                 }
             }
         }

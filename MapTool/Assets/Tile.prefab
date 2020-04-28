@@ -98,6 +98,8 @@ MonoBehaviour:
   numberOfWalls: 0
   wallDirection: 0
   hasDoor: 0
+  Parent: 0
+  buildingID: 0
   wallPrefab: {fileID: 4304040189952168316, guid: 3e5a0dcf5ad477344bad761d60da9a46,
     type: 3}
   tilePrefab: {fileID: 6471723991827966040}
