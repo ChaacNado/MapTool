@@ -9,13 +9,13 @@ public class PCGScript : MonoBehaviour
     public BoardManager board;
     public Sprite wallSprite;
     public GameObject status;
-    int RoadChance;
-    int GridSizeX;
-    int GridSizeY;
+    int gridSizeX;
+    int gridSizeY;
     int minBuildingWidth;
     int minBuildingHeight;
     int maxBuildingWidth;
     int maxBuildingHeight;
+    int splitBuildingChance;
     float RemoveBuildingChance;
     bool[,] grid;
     int rows;
@@ -60,17 +60,18 @@ public class PCGScript : MonoBehaviour
 
     public void Generate()
     {
-        GridSizeX = int.Parse(GameObject.FindWithTag("GridSizeX").GetComponent<InputField>().text);
-        GridSizeY = int.Parse(GameObject.FindWithTag("GridSizeY").GetComponent<InputField>().text);
+        gridSizeX = int.Parse(GameObject.FindWithTag("GridSizeX").GetComponent<InputField>().text);
+        gridSizeY = int.Parse(GameObject.FindWithTag("GridSizeY").GetComponent<InputField>().text);
         minBuildingWidth = int.Parse(GameObject.FindWithTag("MinBuildingWidth").GetComponent<InputField>().text);
         minBuildingHeight = int.Parse(GameObject.FindWithTag("MinBuildingHeight").GetComponent<InputField>().text);
         maxBuildingWidth = int.Parse(GameObject.FindWithTag("MaxBuildingWidth").GetComponent<InputField>().text);
         maxBuildingHeight = int.Parse(GameObject.FindWithTag("MaxBuildingHeight").GetComponent<InputField>().text);
+        splitBuildingChance = int.Parse(GameObject.FindWithTag("SplitBuildingChance").GetComponent<InputField>().text);
         RemoveBuildingChance = float.Parse(GameObject.FindWithTag("RemoveBuildingChance").GetComponent<InputField>().text);
 
         fileName = GameObject.FindWithTag("FileName").GetComponent<InputField>().text;
 
-        board.Prepare(GridSizeX, GridSizeY);
+        board.Prepare(gridSizeX, gridSizeY);
         rows = board.boardRows;
         columns = board.boardColumns;
 
@@ -359,7 +360,10 @@ public class PCGScript : MonoBehaviour
                     //Get the building's width and height based on these values (maybe we should just save that in the building when it's created...)
                     int width = maxRow - lowRow;
                     int height = maxColumn - lowColumn;
-                    if (width >= minBuildingWidth * 2 || height >= minBuildingHeight * 2)
+
+
+
+                    if (UnityEngine.Random.Range(0, 100) <= splitBuildingChance && (width >= minBuildingWidth * 2 || height >= minBuildingHeight * 2))
                     {                 
                         //If the building is wide enough to be split vertically.
                         if (width >= minBuildingWidth * 2)

@@ -26,6 +26,7 @@ TagManager:
   - Emptied
   - GridSizeX
   - GridSizeY
+  - SplitBuildingChance
   layers:
   - Default
   - TransparentFX
